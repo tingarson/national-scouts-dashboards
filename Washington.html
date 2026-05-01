@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Washington · Scout Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #f5a623; --gold-dim: #b87d1a; --gold-pale: rgba(245,166,35,0.10);
+  --gold-glow: rgba(245,166,35,0.22); --sky: #4ab3d8; --sky-pale: rgba(74,179,216,0.12);
+  --green: #3ecf6e; --green-pale: rgba(62,207,110,0.12); --red: #e05a5a;
+  --bg: #0b0d0f; --surface: #111416; --surface2: #181b1e;
+  --border: rgba(245,166,35,0.10); --border-strong: rgba(245,166,35,0.22);
+  --text: #e8e0d0; --muted: #7a6e5e; --muted2: #4a4438;
+}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+body::before { content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events: none; z-index: 0; }
+.app { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; position: relative; z-index: 1; }
+header { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 24px;
+  margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+.brand-tag { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em;
+  color: var(--gold); text-transform: uppercase; margin-bottom: 6px; opacity: 0.7; }
+.brand h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 7vw, 5rem);
+  line-height: 0.9; letter-spacing: 0.04em; color: var(--gold);
+  filter: drop-shadow(0 0 40px rgba(245,166,35,0.3)); }
+.brand h1 span { color: var(--sky); filter: drop-shadow(0 0 20px rgba(74,179,216,0.4)); }
+.brand-sub { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted);
+  letter-spacing: 0.12em; margin-top: 8px; }
+.header-stats { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.hstat { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; }
+.hstat strong { color: var(--text); font-weight: 500; }
+.progress-banner { background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: 12px; padding: 20px 24px; margin-bottom: 28px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; align-items: center; }
+.pstat { display: flex; flex-direction: column; gap: 2px; }
+.pstat-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted);
+  letter-spacing: 0.15em; text-transform: uppercase; }
+.pstat-value { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--gold); line-height: 1; }
+.pstat-value span { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+.master-bar-wrap { display: flex; flex-direction: column; gap: 6px; }
+.master-bar { height: 6px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.master-fill { height: 100%; background: var(--gold); border-radius: 4px; transition: width .4s; }
+.master-pct { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); text-align: right; }
+.day-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.day-tab { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 18px; font-family: 'DM Mono', monospace; font-size: 0.72rem;
+  color: var(--muted); cursor: pointer; transition: all .2s; letter-spacing: 0.08em; }
+.day-tab:hover { border-color: var(--gold-dim); color: var(--text); }
+.day-tab.active { background: var(--gold-pale); border-color: var(--gold); color: var(--gold); }
+.day-panel { display: none; }
+.day-panel.active { display: block; }
+.day-header { display: flex; justify-content: space-between; align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: 12px 12px 0 0; padding: 20px 24px; gap: 16px; }
+.day-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--text); line-height: 1; }
+.day-title span { color: var(--gold); }
+.day-meta { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted);
+  margin-top: 6px; letter-spacing: 0.08em; }
+.night-badge { display: inline-block; margin-left: 12px; background: var(--sky-pale);
+  color: var(--sky); border-radius: 4px; padding: 1px 8px; font-size: 0.65rem; }
+.gmaps-btn { background: var(--sky-pale); border: 1px solid var(--sky); color: var(--sky);
+  border-radius: 8px; padding: 8px 16px; font-family: 'DM Mono', monospace; font-size: 0.7rem;
+  text-decoration: none; white-space: nowrap; transition: all .2s; }
+.gmaps-btn:hover { background: rgba(74,179,216,0.25); }
+.day-progress { background: var(--surface); border-left: 1px solid var(--border-strong);
+  border-right: 1px solid var(--border-strong); padding: 12px 24px;
+  display: flex; align-items: center; gap: 16px; }
+.day-prog-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.day-prog-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .4s; width: 0%; }
+.day-prog-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+.stop-list { background: var(--surface); border: 1px solid var(--border-strong);
+  border-top: none; border-radius: 0 0 12px 12px; overflow: hidden; margin-bottom: 24px; }
+.stop-row { display: grid; grid-template-columns: 36px 1fr auto auto 28px;
+  gap: 12px; align-items: center; padding: 14px 24px;
+  border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s; }
+.stop-row:last-child { border-bottom: none; }
+.stop-row:hover { background: var(--surface2); }
+.stop-row.done { opacity: .45; }
+.stop-row.done .check-icon { color: var(--green); }
+.stop-num { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+.stop-name { font-size: 0.9rem; font-weight: 500; }
+.stop-badge { font-family: 'DM Mono', monospace; font-size: 0.62rem; padding: 2px 8px;
+  border-radius: 4px; letter-spacing: 0.08em; }
+.badge-large  { background: rgba(245,166,35,0.12); color: var(--gold); }
+.badge-medium { background: var(--sky-pale); color: var(--sky); }
+.badge-small  { background: var(--green-pale); color: var(--green); }
+.stop-time { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+.check-icon { color: var(--muted2); font-size: 0.9rem; text-align: center; }
+.travel-row { padding: 6px 24px 6px 72px; font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; color: var(--muted2); border-bottom: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-tag">National Scouts · Route Mission</div>
+      <h1>WASHINGTON</h1>
+      <div class="brand-sub">Roy → Lacey</div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">Stops <strong>31</strong></div>
+      <div class="hstat">Days <strong>7</strong></div>
+      <div class="hstat">Distance <strong>1196 mi</strong></div>
+      <div class="hstat">Scout time <strong>22 h</strong></div>
+      <div class="hstat">Drive time <strong>32 h</strong></div>
+    </div>
+  </header>
+
+  <div class="progress-banner">
+    <div class="pstat">
+      <div class="pstat-label">Completed</div>
+      <div class="pstat-value" id="done-count">0 <span>/ 31</span></div>
+    </div>
+    <div class="pstat">
+      <div class="pstat-label">Remaining</div>
+      <div class="pstat-value" id="rem-count">31 <span>stops</span></div>
+    </div>
+    <div class="pstat">
+      <div class="pstat-label">Current day</div>
+      <div class="pstat-value" id="cur-day-label">Day 1</div>
+    </div>
+    <div class="master-bar-wrap">
+      <div class="master-bar"><div class="master-fill" id="master-fill"></div></div>
+      <div class="master-pct" id="master-pct">0%</div>
+    </div>
+  </div>
+
+  <div class="day-nav">
+    <button class="day-tab active" onclick="switchDay(1)" id="tab-1">Day 1</button>
+    <button class="day-tab" onclick="switchDay(2)" id="tab-2">Day 2</button>
+    <button class="day-tab" onclick="switchDay(3)" id="tab-3">Day 3</button>
+    <button class="day-tab" onclick="switchDay(4)" id="tab-4">Day 4</button>
+    <button class="day-tab" onclick="switchDay(5)" id="tab-5">Day 5</button>
+    <button class="day-tab" onclick="switchDay(6)" id="tab-6">Day 6</button>
+    <button class="day-tab" onclick="switchDay(7)" id="tab-7">Day 7</button>
+  </div>
+
+
+  <!-- DAY 1 -->
+  <div class="day-panel active" id="panel-1">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>01</span> Day 1</div>
+        <div class="day-meta">
+          ~10.2 hrs &nbsp;·&nbsp; 6 stops &nbsp;·&nbsp; 6.7h driving
+          <span class="night-badge">🏨 Night: Carson</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Roy,+Washington/Chehalis,+Washington/Vader,+Washington/Longview,+Washington/Mossyrock,+Washington/Carson,+Washington" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-1"></div></div>
+      <div class="day-prog-label" id="day-prog-label-1">0 / 6</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="1" data-day="1" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">01</div>
+        <div class="stop-name">Roy</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.82h drive</div>
+      <div class="stop-row" data-stop="2" data-day="1" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">02</div>
+        <div class="stop-name">Chehalis</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.48h drive</div>
+      <div class="stop-row" data-stop="3" data-day="1" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">03</div>
+        <div class="stop-name">Vader</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.49h drive</div>
+      <div class="stop-row" data-stop="4" data-day="1" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">04</div>
+        <div class="stop-name">Longview</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.93h drive</div>
+      <div class="stop-row" data-stop="5" data-day="1" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">05</div>
+        <div class="stop-name">Mossyrock</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.70h drive</div>
+      <div class="stop-row" data-stop="6" data-day="1" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">06</div>
+        <div class="stop-name">Carson</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day-panel" id="panel-2">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>02</span> Day 2</div>
+        <div class="day-meta">
+          ~8.4 hrs &nbsp;·&nbsp; 5 stops &nbsp;·&nbsp; 3.9h driving
+          <span class="night-badge">🏨 Night: Richland</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Carson,+Washington/Yakima,+Washington/Sunnyside,+Washington/Royal+City,+Washington/Othello,+Washington/Richland,+Washington" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-2"></div></div>
+      <div class="day-prog-label" id="day-prog-label-2">0 / 5</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="7" data-day="2" data-min="120" onclick="toggleStop(this)">
+        <div class="stop-num">07</div>
+        <div class="stop-name">Yakima</div>
+        <div class="stop-badge badge-large">Large</div>
+        <div class="stop-time">2h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.87h drive</div>
+      <div class="stop-row" data-stop="8" data-day="2" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">08</div>
+        <div class="stop-name">Sunnyside</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.20h drive</div>
+      <div class="stop-row" data-stop="9" data-day="2" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">09</div>
+        <div class="stop-name">Royal City</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.62h drive</div>
+      <div class="stop-row" data-stop="10" data-day="2" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">10</div>
+        <div class="stop-name">Othello</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.02h drive</div>
+      <div class="stop-row" data-stop="11" data-day="2" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">11</div>
+        <div class="stop-name">Richland</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day-panel" id="panel-3">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>03</span> Day 3</div>
+        <div class="day-meta">
+          ~11.2 hrs &nbsp;·&nbsp; 4 stops &nbsp;·&nbsp; 8.2h driving
+          <span class="night-badge">🏨 Night: Deer Park</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Richland,+Washington/Kennewick,+Washington/Garrett,+Washington/Pullman,+Washington/Deer+Park,+Washington" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-3"></div></div>
+      <div class="day-prog-label" id="day-prog-label-3">0 / 4</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="12" data-day="3" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">12</div>
+        <div class="stop-name">Kennewick</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.02h drive</div>
+      <div class="stop-row" data-stop="13" data-day="3" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">13</div>
+        <div class="stop-name">Garrett</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">2.02h drive</div>
+      <div class="stop-row" data-stop="14" data-day="3" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">14</div>
+        <div class="stop-name">Pullman</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">2.31h drive</div>
+      <div class="stop-row" data-stop="15" data-day="3" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">15</div>
+        <div class="stop-name">Deer Park</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="day-panel" id="panel-4">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>04</span> Day 4</div>
+        <div class="day-meta">
+          ~7.7 hrs &nbsp;·&nbsp; 4 stops &nbsp;·&nbsp; 5.2h driving
+          <span class="night-badge">🏨 Night: Marysville</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Deer+Park,+Washington/Brewster,+Washington/Manson,+Washington/Cle+Elum,+Washington/Marysville,+Washington" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-4"></div></div>
+      <div class="day-prog-label" id="day-prog-label-4">0 / 4</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="16" data-day="4" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">16</div>
+        <div class="stop-name">Brewster</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.69h drive</div>
+      <div class="stop-row" data-stop="17" data-day="4" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">17</div>
+        <div class="stop-name">Manson</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.61h drive</div>
+      <div class="stop-row" data-stop="18" data-day="4" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">18</div>
+        <div class="stop-name">Cle Elum</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">2.24h drive</div>
+      <div class="stop-row" data-stop="19" data-day="4" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">19</div>
+        <div class="stop-name">Marysville</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="day-panel" id="panel-5">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>05</span> Day 5</div>
+        <div class="day-meta">
+          ~7.8 hrs &nbsp;·&nbsp; 6 stops &nbsp;·&nbsp; 3.8h driving
+          <span class="night-badge">🏨 Night: Keyport</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Marysville,+Washington/Mount+Vernon,+Washington/Bellingham,+Washington/Marietta-Alderwood,+Washington/Port+Angeles+East,+Washington/Port+Ludlow,+Washington/Keyport,+Washington" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-5"></div></div>
+      <div class="day-prog-label" id="day-prog-label-5">0 / 6</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="20" data-day="5" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">20</div>
+        <div class="stop-name">Mount Vernon</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.64h drive</div>
+      <div class="stop-row" data-stop="21" data-day="5" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">21</div>
+        <div class="stop-name">Bellingham</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.15h drive</div>
+      <div class="stop-row" data-stop="22" data-day="5" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">22</div>
+        <div class="stop-name">Marietta-Alderwood</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.61h drive</div>
+      <div class="stop-row" data-stop="23" data-day="5" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">23</div>
+        <div class="stop-name">Port Angeles East</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.91h drive</div>
+      <div class="stop-row" data-stop="24" data-day="5" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">24</div>
+        <div class="stop-name">Port Ludlow</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.40h drive</div>
+      <div class="stop-row" data-stop="25" data-day="5" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">25</div>
+        <div class="stop-name">Keyport</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 6 -->
+  <div class="day-panel" id="panel-6">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>06</span> Day 6</div>
+        <div class="day-meta">
+          ~7.7 hrs &nbsp;·&nbsp; 5 stops &nbsp;·&nbsp; 4.2h driving
+          <span class="night-badge">🏨 Night: Tumwater</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Keyport,+Washington/Bainbridge+Island,+Washington/Chico,+Washington/Taholah,+Washington/McCleary,+Washington/Tumwater,+Washington" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-6"></div></div>
+      <div class="day-prog-label" id="day-prog-label-6">0 / 5</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="26" data-day="6" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">26</div>
+        <div class="stop-name">Bainbridge Island</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.22h drive</div>
+      <div class="stop-row" data-stop="27" data-day="6" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">27</div>
+        <div class="stop-name">Chico</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">2.01h drive</div>
+      <div class="stop-row" data-stop="28" data-day="6" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">28</div>
+        <div class="stop-name">Taholah</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.35h drive</div>
+      <div class="stop-row" data-stop="29" data-day="6" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">29</div>
+        <div class="stop-name">McCleary</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.48h drive</div>
+      <div class="stop-row" data-stop="30" data-day="6" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">30</div>
+        <div class="stop-name">Tumwater</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 7 -->
+  <div class="day-panel" id="panel-7">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>07</span> Day 7</div>
+        <div class="day-meta">
+          ~1.0 hrs &nbsp;·&nbsp; 1 stops &nbsp;·&nbsp; 0.0h driving
+          <span class="night-badge">🏁 End: Lacey</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Tumwater,+Washington/Lacey,+Washington" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-7"></div></div>
+      <div class="day-prog-label" id="day-prog-label-7">0 / 1</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="31" data-day="7" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">31</div>
+        <div class="stop-name">Lacey</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'washington_1h26_progress';
+const DAY_COUNTS  = {1: 6, 2: 5, 3: 4, 4: 4, 5: 6, 6: 5, 7: 1};
+const TOTAL       = 31;
+let completedSet  = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+
+function saveProgress() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...completedSet]));
+}
+
+function updateBanner() {
+  const done = completedSet.size;
+  document.getElementById('done-count').innerHTML = done + ' <span>/ 31</span>';
+  document.getElementById('rem-count').innerHTML  = (TOTAL - done) + ' <span>stops</span>';
+  const pct = TOTAL > 0 ? Math.round(done / TOTAL * 100) : 0;
+  document.getElementById('master-fill').style.width = pct + '%';
+  document.getElementById('master-pct').textContent  = pct + '%';
+  let cumul = 0;
+  for (const [day, cnt] of Object.entries(DAY_COUNTS)) {
+    const prev = cumul; cumul += cnt;
+    const fill = document.getElementById('day-prog-' + day);
+    const lbl  = document.getElementById('day-prog-label-' + day);
+    if (!fill) continue;
+    const dayDone = [...completedSet].filter(n => n > prev && n <= cumul).length;
+    fill.style.width = cnt > 0 ? (dayDone / cnt * 100) + '%' : '0%';
+    if (lbl) lbl.textContent = dayDone + ' / ' + cnt;
+  }
+  let activeDay = 1;
+  let cumul2 = 0;
+  for (const [day, cnt] of Object.entries(DAY_COUNTS)) {
+    cumul2 += cnt;
+    if (completedSet.size < cumul2) { activeDay = parseInt(day); break; }
+  }
+  document.getElementById('cur-day-label').textContent = 'Day ' + activeDay;
+}
+
+function toggleStop(el) {
+  const n = parseInt(el.dataset.stop);
+  if (completedSet.has(n)) completedSet.delete(n);
+  else completedSet.add(n);
+  el.classList.toggle('done', completedSet.has(n));
+  saveProgress(); updateBanner();
+}
+
+function switchDay(d) {
+  document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  const panel = document.getElementById('panel-' + d);
+  const tab   = document.getElementById('tab-' + d);
+  if (panel) panel.classList.add('active');
+  if (tab)   tab.classList.add('active');
+}
+
+// Restore saved state
+completedSet.forEach(n => {
+  const el = document.querySelector('[data-stop="' + n + '"]');
+  if (el) el.classList.add('done');
+});
+updateBanner();
+</script>
+</body>
+</html>

@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>South Carolina · Scout Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold:#f5a623; --gold-dim:#b87d1a; --gold-pale:rgba(245,166,35,.10);
+  --gold-glow:rgba(245,166,35,.22); --sky:#4ab3d8; --sky-pale:rgba(74,179,216,.12);
+  --green:#3ecf6e; --green-pale:rgba(62,207,110,.12); --red:#e05a5a;
+  --bg:#0b0d0f; --surface:#111416; --surface2:#181b1e;
+  --border:rgba(245,166,35,.10); --border-strong:rgba(245,166,35,.22);
+  --text:#e8e0d0; --muted:#7a6e5e; --muted2:#4a4438;
+}
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+body::before { content:''; position:fixed; inset:0;
+  background-image:linear-gradient(rgba(245,166,35,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(245,166,35,.03) 1px,transparent 1px);
+  background-size:48px 48px; pointer-events:none; z-index:0; }
+.app { max-width:1100px; margin:0 auto; padding:40px 24px 80px; position:relative; z-index:1; }
+header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24px;
+  margin-bottom:40px; padding-bottom:28px; border-bottom:1px solid var(--border); }
+.brand-tag { font-family:'DM Mono',monospace; font-size:.7rem; letter-spacing:.2em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:6px; opacity:.7; }
+.brand h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,7vw,5rem);
+  line-height:.9; letter-spacing:.04em; color:var(--gold);
+  filter:drop-shadow(0 0 40px rgba(245,166,35,.3)); }
+.brand h1 span { color:var(--sky); filter:drop-shadow(0 0 20px rgba(74,179,216,.4)); }
+.brand-sub { font-family:'DM Mono',monospace; font-size:.72rem; color:var(--muted);
+  letter-spacing:.12em; margin-top:8px; }
+.header-stats { display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.hstat { font-family:'DM Mono',monospace; font-size:.7rem; color:var(--muted); letter-spacing:.1em; }
+.hstat strong { color:var(--text); font-weight:500; }
+.progress-banner { background:var(--surface); border:1px solid var(--border-strong);
+  border-radius:12px; padding:20px 24px; margin-bottom:28px;
+  display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:16px; align-items:center; }
+.pstat { display:flex; flex-direction:column; gap:2px; }
+.pstat-label { font-family:'DM Mono',monospace; font-size:.65rem; color:var(--muted);
+  letter-spacing:.15em; text-transform:uppercase; }
+.pstat-value { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--gold); line-height:1; }
+.pstat-value span { font-family:'DM Mono',monospace; font-size:.7rem; color:var(--muted); }
+.master-bar-wrap { display:flex; flex-direction:column; gap:6px; }
+.master-bar { height:6px; background:var(--surface2); border-radius:4px; overflow:hidden; }
+.master-fill { height:100%; background:var(--gold); border-radius:4px; transition:width .4s; }
+.master-pct { font-family:'DM Mono',monospace; font-size:.65rem; color:var(--muted); text-align:right; }
+.day-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.add-day-btn { background:transparent; border:1px dashed rgba(245,166,35,.35);
+  border-radius:8px; color:var(--gold-dim); padding:5px 14px; cursor:pointer;
+  font-size:.75rem; font-family:'DM Sans',sans-serif; transition:all .15s; }
+.add-day-btn:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-pale); }
+.day-tab { background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  padding:8px 18px; font-family:'DM Mono',monospace; font-size:.72rem;
+  color:var(--muted); cursor:pointer; transition:all .2s; letter-spacing:.08em; }
+.day-tab:hover { border-color:var(--gold-dim); color:var(--text); }
+.day-tab.active { background:var(--gold-pale); border-color:var(--gold); color:var(--gold); }
+.day-panel { display:none; }
+.day-panel.active { display:block; }
+.day-header { display:flex; justify-content:space-between; align-items:flex-start;
+  background:var(--surface); border:1px solid var(--border-strong);
+  border-radius:12px 12px 0 0; padding:20px 24px; gap:16px; }
+.day-title { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--text); line-height:1; }
+.day-title span { color:var(--gold); }
+.day-meta { font-family:'DM Mono',monospace; font-size:.7rem; color:var(--muted);
+  margin-top:6px; letter-spacing:.08em; }
+.night-badge { display:inline-block; margin-left:12px; background:var(--sky-pale);
+  color:var(--sky); border-radius:4px; padding:1px 8px; font-size:.65rem; }
+.gmaps-btn { background:var(--sky-pale); border:1px solid var(--sky); color:var(--sky);
+  border-radius:8px; padding:8px 16px; font-family:'DM Mono',monospace; font-size:.7rem;
+  text-decoration:none; white-space:nowrap; transition:all .2s; }
+.gmaps-btn:hover { background:rgba(74,179,216,.25); }
+.day-progress { background:var(--surface); border-left:1px solid var(--border-strong);
+  border-right:1px solid var(--border-strong); padding:12px 24px;
+  display:flex; align-items:center; gap:16px; }
+.day-prog-bar { flex:1; height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; }
+.day-prog-fill { height:100%; background:var(--green); border-radius:2px; transition:width .4s; width:0%; }
+.day-prog-label { font-family:'DM Mono',monospace; font-size:.65rem; color:var(--muted); white-space:nowrap; }
+.stop-list { background:var(--surface); border:1px solid var(--border-strong);
+  border-top:none; border-radius:0 0 12px 12px; overflow:hidden; margin-bottom:24px;
+  min-height:48px; }
+.stop-row { display:grid; grid-template-columns:22px 36px 28px 1fr auto auto 28px 26px;
+  gap:12px; align-items:center; padding:14px 20px 14px 16px;
+  border-bottom:1px solid var(--border); transition:background .15s; }
+.stop-row:last-child { border-bottom:none; }
+.stop-row:hover { background:var(--surface2); }
+.stop-row.done { opacity:.45; }
+.stop-row.done .check-icon { color:var(--green); }
+.drag-handle { color:var(--muted2); cursor:grab; font-size:.85rem;
+  display:flex; align-items:center; justify-content:center; padding:2px; }
+.drag-handle:active { cursor:grabbing; }
+.stop-row.sortable-ghost { opacity:.35; background:var(--surface2); }
+.stop-row.sortable-chosen { background:var(--surface2); }
+.stop-num { font-family:'DM Mono',monospace; font-size:.7rem; color:var(--muted);
+  cursor:pointer; border-radius:3px; padding:1px 3px; user-select:none; }
+.stop-num:hover { color:var(--gold); background:var(--gold-pale); }
+.stop-day { font-family:'DM Mono',monospace; font-size:.62rem; color:var(--sky);
+  cursor:pointer; border-radius:3px; padding:1px 3px; user-select:none;
+  border:1px solid transparent; text-align:center; }
+.stop-day:hover { border-color:var(--sky); background:var(--sky-pale); }
+.stop-name { font-size:.9rem; font-weight:500; cursor:pointer; }
+.stop-badge { font-family:'DM Mono',monospace; font-size:.62rem; padding:2px 8px;
+  border-radius:4px; letter-spacing:.08em; }
+.badge-large  { background:rgba(245,166,35,.12); color:var(--gold); }
+.badge-medium { background:var(--sky-pale); color:var(--sky); }
+.badge-small  { background:var(--green-pale); color:var(--green); }
+.stop-time { font-family:'DM Mono',monospace; font-size:.7rem; color:var(--muted); }
+.check-icon { color:var(--muted2); font-size:.9rem; text-align:center; cursor:pointer; }
+.travel-row { padding:6px 20px 6px 74px; font-family:'DM Mono',monospace;
+  font-size:.65rem; color:var(--sky); border-bottom:1px solid var(--border); }
+.eod-moon { font-size:.75rem; text-align:center; opacity:0; pointer-events:none; }
+.stop-row.is-eod .eod-moon { opacity:1; }
+.eod-section, .sod-section {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:9px 20px 9px 16px; border-bottom:1px solid var(--border);
+}
+.eod-section { border-left:3px solid var(--gold); background:rgba(245,166,35,.05); }
+.sod-section { border-left:3px solid var(--sky);  background:rgba(74,179,216,.04); }
+.eod-section.driven, .sod-section.driven { opacity:.4; }
+.eod-section-label {
+  font-family:'DM Mono',monospace; font-size:.65rem; color:var(--gold);
+  font-style:italic; flex:1;
+}
+.sod-section-label {
+  font-family:'DM Mono',monospace; font-size:.65rem; color:var(--sky);
+  font-style:italic; flex:1;
+}
+.eod-drive-check {
+  font-size:.72rem; font-family:'DM Sans',sans-serif; font-weight:600;
+  cursor:pointer; padding:5px 14px; border-radius:20px; white-space:nowrap;
+  border:2px solid rgba(245,166,35,.5); color:var(--gold);
+  background:rgba(245,166,35,.08); transition:all .15s; flex-shrink:0;
+  letter-spacing:.02em;
+}
+.eod-drive-check:hover { background:rgba(245,166,35,.2); border-color:var(--gold); }
+.eod-drive-check.driven {
+  background:var(--green); border-color:var(--green); color:#000; font-weight:700;
+  font-style:normal;
+}
+.hotel-section {
+  display:flex; align-items:center; gap:10px; padding:7px 20px;
+  border-bottom:1px solid var(--border); min-height:36px;
+}
+.hotel-add-btn {
+  background:transparent; border:1px dashed rgba(62,207,110,.35);
+  color:var(--muted2); border-radius:20px; padding:3px 12px;
+  font-size:.7rem; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .15s;
+}
+.hotel-add-btn:hover { border-color:var(--green); color:var(--green); }
+.hotel-badge {
+  font-family:'DM Mono',monospace; font-size:.7rem; color:var(--green);
+  background:var(--green-pale); border:1px solid rgba(62,207,110,.3);
+  border-radius:20px; padding:3px 10px;
+}
+.hotel-remove {
+  color:var(--muted2); cursor:pointer; font-size:.75rem;
+  padding:1px 5px; border-radius:4px; transition:color .15s;
+}
+.hotel-remove:hover { color:var(--red); }
+.hotel-search-wrap { width:100%; position:relative; }
+.hotel-search-input {
+  width:100%; background:var(--surface2); border:1px solid var(--sky);
+  border-radius:6px; color:var(--text); font-family:'DM Sans',sans-serif;
+  font-size:.8rem; padding:6px 12px; outline:none;
+}
+.hotel-results {
+  position:absolute; top:calc(100% + 4px); left:0; right:0;
+  background:var(--surface); border:1px solid var(--border); border-radius:6px;
+  z-index:200; max-height:200px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.hotel-result {
+  padding:8px 12px; font-size:.78rem; color:var(--text-dim); cursor:pointer;
+  border-bottom:1px solid var(--border); font-family:'DM Sans',sans-serif;
+}
+.hotel-result:last-child { border-bottom:none; }
+.hotel-result:hover { background:var(--surface2); color:var(--text); }
+.hotel-result.muted { color:var(--muted); cursor:default; font-style:italic; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="brand-tag">National Scouts · Route Mission</div>
+      <h1>SOUTH<span> </span>CAROLINA</h1>
+      <div class="brand-sub">North Myrtle Beach → Hilton Head Island</div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">Stops <strong>34</strong></div>
+      <div class="hstat">Days <strong>6</strong></div>
+      <div class="hstat">Distance <strong>774 mi</strong></div>
+      <div class="hstat">Scout time <strong>28 h</strong></div>
+      <div class="hstat">Drive time <strong>21 h</strong></div>
+    </div>
+  </header>
+
+  <div class="progress-banner">
+    <div class="pstat">
+      <div class="pstat-label">Completed</div>
+      <div class="pstat-value" id="done-count">0 <span>/ 34</span></div>
+    </div>
+    <div class="pstat">
+      <div class="pstat-label">Remaining</div>
+      <div class="pstat-value" id="rem-count">34 <span>stops</span></div>
+    </div>
+    <div class="pstat">
+      <div class="pstat-label">Current day</div>
+      <div class="pstat-value" id="cur-day-label">Day 1</div>
+    </div>
+    <div class="master-bar-wrap">
+      <div class="master-bar"><div class="master-fill" id="master-fill"></div></div>
+      <div class="master-pct" id="master-pct">0%</div>
+    </div>
+  </div>
+
+  <div class="day-nav">
+    <button class="day-tab active" onclick="switchDay(1)" id="tab-1">Day 1</button>
+    <button class="day-tab" onclick="switchDay(2)" id="tab-2">Day 2</button>
+    <button class="day-tab" onclick="switchDay(3)" id="tab-3">Day 3</button>
+    <button class="day-tab" onclick="switchDay(4)" id="tab-4">Day 4</button>
+    <button class="day-tab" onclick="switchDay(5)" id="tab-5">Day 5</button>
+    <button class="day-tab" onclick="switchDay(6)" id="tab-6">Day 6</button>
+    <button class="add-day-btn" id="add-day-btn" onclick="addDay()">+ Add Day</button>
+  </div>
+
+
+  <div class="day-panel active" id="panel-1">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>01</span> Day 1</div>
+        <div class="day-meta" id="day-meta-1"></div>
+      </div>
+      <a class="gmaps-btn" id="gmaps-1" href="#" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-1"></div></div>
+      <div class="day-prog-label" id="day-prog-label-1">0 / 6</div>
+    </div>
+    <div class="stop-list" id="stop-list-1">
+
+      <div class="stop-row" data-stop="1" data-day="1" data-name="North Myrtle Beach" data-lat="33.821331" data-lon="-78.68364413854923" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">01</div>
+        <div class="stop-day" title="Click to change day">D1</div>
+        <div class="stop-name">North Myrtle Beach</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="2" data-day="1" data-name="Carolina Forest" data-lat="33.763543999999996" data-lon="-78.90420208489635" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">02</div>
+        <div class="stop-day" title="Click to change day">D1</div>
+        <div class="stop-name">Carolina Forest</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="3" data-day="1" data-name="Socastee" data-lat="33.6907205" data-lon="-79.03300407426248" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">03</div>
+        <div class="stop-day" title="Click to change day">D1</div>
+        <div class="stop-name">Socastee</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="4" data-day="1" data-name="Litchfield Beach" data-lat="33.4720944201843" data-lon="-79.11880133712259" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">04</div>
+        <div class="stop-day" title="Click to change day">D1</div>
+        <div class="stop-name">Litchfield Beach</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="5" data-day="1" data-name="Aynor" data-lat="34.000506" data-lon="-79.20010395819276" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">05</div>
+        <div class="stop-day" title="Click to change day">D1</div>
+        <div class="stop-name">Aynor</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="6" data-day="1" data-name="Marion" data-lat="34.17888" data-lon="-79.39805728472982" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">06</div>
+        <div class="stop-day" title="Click to change day">D1</div>
+        <div class="stop-name">Marion</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-panel" id="panel-2">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>02</span> Day 2</div>
+        <div class="day-meta" id="day-meta-2"></div>
+      </div>
+      <a class="gmaps-btn" id="gmaps-2" href="#" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-2"></div></div>
+      <div class="day-prog-label" id="day-prog-label-2">0 / 4</div>
+    </div>
+    <div class="stop-list" id="stop-list-2">
+
+      <div class="stop-row" data-stop="7" data-day="2" data-name="Florence" data-lat="34.174544" data-lon="-79.78019953553357" data-min="120" data-size="Large" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">07</div>
+        <div class="stop-day" title="Click to change day">D2</div>
+        <div class="stop-name">Florence</div>
+        <div class="stop-badge badge-large">Large</div>
+        <div class="stop-time">2h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="8" data-day="2" data-name="Clio" data-lat="34.578837" data-lon="-79.54650427725946" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">08</div>
+        <div class="stop-day" title="Click to change day">D2</div>
+        <div class="stop-name">Clio</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="9" data-day="2" data-name="Pageland" data-lat="34.7741345" data-lon="-80.39146061055405" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">09</div>
+        <div class="stop-day" title="Click to change day">D2</div>
+        <div class="stop-name">Pageland</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="10" data-day="2" data-name="Rock Hill" data-lat="34.942423000000005" data-lon="-81.0235620332032" data-min="120" data-size="Large" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">10</div>
+        <div class="stop-day" title="Click to change day">D2</div>
+        <div class="stop-name">Rock Hill</div>
+        <div class="stop-badge badge-large">Large</div>
+        <div class="stop-time">2h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-panel" id="panel-3">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>03</span> Day 3</div>
+        <div class="day-meta" id="day-meta-3"></div>
+      </div>
+      <a class="gmaps-btn" id="gmaps-3" href="#" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-3"></div></div>
+      <div class="day-prog-label" id="day-prog-label-3">0 / 7</div>
+    </div>
+    <div class="stop-list" id="stop-list-3">
+
+      <div class="stop-row" data-stop="11" data-day="3" data-name="Fort Mill" data-lat="35.0057005" data-lon="-80.94819192707698" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">11</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Fort Mill</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="12" data-day="3" data-name="Baxter Village" data-lat="35.0280225" data-lon="-80.9781559218307" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">12</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Baxter Village</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="13" data-day="3" data-name="Gaffney" data-lat="35.0720925" data-lon="-81.65329899323979" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">13</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Gaffney</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="14" data-day="3" data-name="Camp Croft" data-lat="34.909051000000005" data-lon="-81.85777208986532" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">14</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Camp Croft</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="15" data-day="3" data-name="Whitney" data-lat="34.9828725" data-lon="-81.9261686172382" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">15</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Whitney</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="16" data-day="3" data-name="Spartanburg" data-lat="34.9398755" data-lon="-81.93277101424968" data-min="120" data-size="Large" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">16</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Spartanburg</div>
+        <div class="stop-badge badge-large">Large</div>
+        <div class="stop-time">2h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="17" data-day="3" data-name="Reidville" data-lat="34.866907499999996" data-lon="-82.11233323310135" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">17</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Reidville</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-panel" id="panel-4">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>04</span> Day 4</div>
+        <div class="day-meta" id="day-meta-4"></div>
+      </div>
+      <a class="gmaps-btn" id="gmaps-4" href="#" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-4"></div></div>
+      <div class="day-prog-label" id="day-prog-label-4">0 / 5</div>
+    </div>
+    <div class="stop-list" id="stop-list-4">
+
+      <div class="stop-row" data-stop="18" data-day="4" data-name="Mauldin" data-lat="34.7741985" data-lon="-82.30598651881135" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">18</div>
+        <div class="stop-day" title="Click to change day">D4</div>
+        <div class="stop-name">Mauldin</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="19" data-day="4" data-name="Homeland Park" data-lat="34.4659295" data-lon="-82.66323441438877" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">19</div>
+        <div class="stop-day" title="Click to change day">D4</div>
+        <div class="stop-name">Homeland Park</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="20" data-day="4" data-name="Greenwood" data-lat="34.209704" data-lon="-82.15941652342471" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">20</div>
+        <div class="stop-day" title="Click to change day">D4</div>
+        <div class="stop-name">Greenwood</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="21" data-day="4" data-name="Joanna" data-lat="34.412696499999996" data-lon="-81.81159152678529" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">21</div>
+        <div class="stop-day" title="Click to change day">D4</div>
+        <div class="stop-name">Joanna</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="22" data-day="4" data-name="Winnsboro" data-lat="34.369172500000005" data-lon="-81.09292906645624" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">22</div>
+        <div class="stop-day" title="Click to change day">D4</div>
+        <div class="stop-name">Winnsboro</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-panel" id="panel-5">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>05</span> Day 5</div>
+        <div class="day-meta" id="day-meta-5"></div>
+      </div>
+      <a class="gmaps-btn" id="gmaps-5" href="#" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-5"></div></div>
+      <div class="day-prog-label" id="day-prog-label-5">0 / 6</div>
+    </div>
+    <div class="stop-list" id="stop-list-5">
+
+      <div class="stop-row" data-stop="23" data-day="5" data-name="Kingstree" data-lat="33.667237" data-lon="-79.8306519002528" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">23</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Kingstree</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="24" data-day="5" data-name="Privateer" data-lat="33.821058" data-lon="-80.39460534265527" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">24</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Privateer</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="25" data-day="5" data-name="Sumter" data-lat="33.929010500000004" data-lon="-80.3564678952097" data-min="120" data-size="Large" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">25</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Sumter</div>
+        <div class="stop-badge badge-large">Large</div>
+        <div class="stop-time">2h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="26" data-day="5" data-name="Wedgefield" data-lat="33.8812265" data-lon="-80.51766446901041" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">26</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Wedgefield</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="27" data-day="5" data-name="Elgin" data-lat="34.173629" data-lon="-80.78944030738784" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">27</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Elgin</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="28" data-day="5" data-name="Orangeburg" data-lat="33.48766" data-lon="-80.86084034004065" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">28</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Orangeburg</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-panel" id="panel-6">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>06</span> Day 6</div>
+        <div class="day-meta" id="day-meta-6"></div>
+      </div>
+      <a class="gmaps-btn" id="gmaps-6" href="#" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-6"></div></div>
+      <div class="day-prog-label" id="day-prog-label-6">0 / 6</div>
+    </div>
+    <div class="stop-list" id="stop-list-6">
+
+      <div class="stop-row" data-stop="29" data-day="6" data-name="Branchville" data-lat="33.251676" data-lon="-80.81613192735921" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">29</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Branchville</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="30" data-day="6" data-name="Walterboro" data-lat="32.9108765" data-lon="-80.66206488321384" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">30</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Walterboro</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="31" data-day="6" data-name="Sheldon" data-lat="32.598735000000005" data-lon="-80.7954044143098" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">31</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Sheldon</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="32" data-day="6" data-name="Laurel Bay" data-lat="32.4596005" data-lon="-80.78468472849505" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">32</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Laurel Bay</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="33" data-day="6" data-name="Bluffton" data-lat="32.2105425" data-lon="-80.94163860217938" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">33</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Bluffton</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="34" data-day="6" data-name="Hilton Head Island" data-lat="32.191627499999996" data-lon="-80.74237256645927" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">34</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Hilton Head Island</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY  = 'south_carolina_1h26_progress';   // stable — survives regeneration
+const EOD_KEY      = 'south_carolina_1h26_eod';        // driven evening of day N (keyed by day N)
+const HOTELS_KEY   = 'south_carolina_1h26_hotels';     // overnight stops keyed by day N
+const ORDER_KEY    = 'south_carolina_1h26_20260428T171149_order';     // per-generation — resets on regenerate
+let TOTAL_DAYS     = 6;
+const STATE        = 'South Carolina';
+const TOWN_COORDS  = {"North Myrtle Beach": {"lat": 33.821331, "lon": -78.68364413854923}, "Carolina Forest": {"lat": 33.763543999999996, "lon": -78.90420208489635}, "Socastee": {"lat": 33.6907205, "lon": -79.03300407426248}, "Litchfield Beach": {"lat": 33.4720944201843, "lon": -79.11880133712259}, "Aynor": {"lat": 34.000506, "lon": -79.20010395819276}, "Marion": {"lat": 34.17888, "lon": -79.39805728472982}, "Florence": {"lat": 34.174544, "lon": -79.78019953553357}, "Clio": {"lat": 34.578837, "lon": -79.54650427725946}, "Pageland": {"lat": 34.7741345, "lon": -80.39146061055405}, "Rock Hill": {"lat": 34.942423000000005, "lon": -81.0235620332032}, "Fort Mill": {"lat": 35.0057005, "lon": -80.94819192707698}, "Baxter Village": {"lat": 35.0280225, "lon": -80.9781559218307}, "Gaffney": {"lat": 35.0720925, "lon": -81.65329899323979}, "Camp Croft": {"lat": 34.909051000000005, "lon": -81.85777208986532}, "Whitney": {"lat": 34.9828725, "lon": -81.9261686172382}, "Spartanburg": {"lat": 34.9398755, "lon": -81.93277101424968}, "Reidville": {"lat": 34.866907499999996, "lon": -82.11233323310135}, "Mauldin": {"lat": 34.7741985, "lon": -82.30598651881135}, "Homeland Park": {"lat": 34.4659295, "lon": -82.66323441438877}, "Greenwood": {"lat": 34.209704, "lon": -82.15941652342471}, "Joanna": {"lat": 34.412696499999996, "lon": -81.81159152678529}, "Winnsboro": {"lat": 34.369172500000005, "lon": -81.09292906645624}, "Kingstree": {"lat": 33.667237, "lon": -79.8306519002528}, "Privateer": {"lat": 33.821058, "lon": -80.39460534265527}, "Sumter": {"lat": 33.929010500000004, "lon": -80.3564678952097}, "Wedgefield": {"lat": 33.8812265, "lon": -80.51766446901041}, "Elgin": {"lat": 34.173629, "lon": -80.78944030738784}, "Orangeburg": {"lat": 33.48766, "lon": -80.86084034004065}, "Branchville": {"lat": 33.251676, "lon": -80.81613192735921}, "Walterboro": {"lat": 32.9108765, "lon": -80.66206488321384}, "Sheldon": {"lat": 32.598735000000005, "lon": -80.7954044143098}, "Laurel Bay": {"lat": 32.4596005, "lon": -80.78468472849505}, "Bluffton": {"lat": 32.2105425, "lon": -80.94163860217938}, "Hilton Head Island": {"lat": 32.191627499999996, "lon": -80.74237256645927}};
+const AVG_KMH      = 60;
+const SCOUT_MINS   = {"Large":120,"Medium":60,"Small":30};
+
+// Completion tracked by name so it survives reordering
+let completedSet      = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+// eodDriven: was the commute driven as the last act of day N? — keyed by day N
+// If not, it automatically counts as a morning drive on day N+1 (no checkbox needed)
+let eodDriven    = new Set(JSON.parse(localStorage.getItem(EOD_KEY) || '[]'));
+let overnightStops = JSON.parse(localStorage.getItem(HOTELS_KEY) || '{}');
+function saveCommutes() { localStorage.setItem(EOD_KEY, JSON.stringify([...eodDriven])); }
+function saveHotels()   { localStorage.setItem(HOTELS_KEY, JSON.stringify(overnightStops)); }
+
+// ── Haversine drive-time estimate ─────────────────────────────────────────────
+function haversineKm(lat1,lon1,lat2,lon2) {
+  const R=6371, dl=(lat2-lat1)*Math.PI/180, dg=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dl/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dg/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function driveH(n1,n2) {
+  const c1=TOWN_COORDS[n1],c2=TOWN_COORDS[n2];
+  return (c1&&c2) ? haversineKm(c1.lat,c1.lon,c2.lat,c2.lon)/AVG_KMH : 0;
+}
+
+// ── Rebuild travel rows + day stats for every day ────────────────────────────
+function rebuildAll() {
+  let globalNum = 0;
+  for (let d=1; d<=TOTAL_DAYS; d++) {
+    const list = document.getElementById('stop-list-'+d);
+    if (!list) continue;
+    list.querySelectorAll('.travel-row, .commute-row, .eod-section, .sod-section, .hotel-section').forEach(r=>r.remove());
+    const stops = [...list.querySelectorAll('.stop-row')];
+    stops.forEach(s => s.classList.remove('is-eod'));
+    let scoutH=0, driveH_=0;
+
+    // Morning arrival section — drive from previous day's last stop
+    if (d > 1 && stops.length > 0) {
+      const prevList = document.getElementById('stop-list-'+(d-1));
+      if (prevList) {
+        const prevStops = [...prevList.querySelectorAll('.stop-row')];
+        if (prevStops.length > 0) {
+          const key = d - 1;
+          const hotel = overnightStops[key];
+          const drivenEvening = eodDriven.has(key);
+          let commute, fromName;
+          if (hotel) {
+            commute = haversineKm(hotel.lat, hotel.lon,
+              parseFloat(stops[0].dataset.lat), parseFloat(stops[0].dataset.lon)) / AVG_KMH;
+            fromName = hotel.name;
+          } else {
+            commute = driveH(prevStops[prevStops.length-1].dataset.name, stops[0].dataset.name);
+            fromName = prevStops[prevStops.length-1].dataset.name;
+          }
+          if (!drivenEvening) driveH_ += commute;
+          const sod = document.createElement('div');
+          sod.className = 'sod-section' + (drivenEvening ? ' driven' : '');
+          const lbl = document.createElement('span');
+          lbl.className = 'sod-section-label';
+          lbl.textContent = drivenEvening
+            ? `☀️ Day ${d} morning · ${commute.toFixed(2)}h from ${fromName} — driven evening`
+            : `☀️ Day ${d} morning · ${commute.toFixed(2)}h drive from ${fromName}`;
+          sod.appendChild(lbl);
+          list.insertBefore(sod, stops[0]);
+        }
+      }
+    }
+
+    stops.forEach((stop,si) => {
+      globalNum++;
+      stop.dataset.stop = globalNum;
+      stop.dataset.day  = d;
+      stop.querySelector('.stop-num').textContent = String(globalNum).padStart(2,'0');
+      const dayEl = stop.querySelector('.stop-day');
+      if (dayEl) dayEl.textContent = 'D'+d;
+      scoutH += parseInt(stop.dataset.min)/60;
+      if (si < stops.length-1) {
+        const dh = driveH(stop.dataset.name, stops[si+1].dataset.name);
+        driveH_ += dh;
+        const tr = document.createElement('div');
+        tr.className='travel-row';
+        tr.textContent = dh.toFixed(2)+'h drive';
+        stop.after(tr);
+      }
+    });
+    // End-of-day section attached to the last stop (overnight drive to next day)
+    if (d < TOTAL_DAYS && stops.length > 0) {
+      const nextList = document.getElementById('stop-list-'+(d+1));
+      if (nextList) {
+        const nextStops = [...nextList.querySelectorAll('.stop-row')];
+        if (nextStops.length > 0) {
+          const lastStop = stops[stops.length-1];
+          lastStop.classList.add('is-eod');
+          const hotel = overnightStops[d];
+          let commute, eodDest;
+          if (hotel) {
+            commute = haversineKm(
+              parseFloat(lastStop.dataset.lat), parseFloat(lastStop.dataset.lon),
+              hotel.lat, hotel.lon) / AVG_KMH;
+            eodDest = hotel.name;
+          } else {
+            commute = driveH(lastStop.dataset.name, nextStops[0].dataset.name);
+            eodDest = nextStops[0].dataset.name;
+          }
+          const isEodDone = eodDriven.has(d);
+          if (isEodDone) driveH_ += commute;
+          const sec = document.createElement('div');
+          sec.className = 'eod-section' + (isEodDone ? ' driven' : '');
+          const lbl = document.createElement('span');
+          lbl.className = 'eod-section-label';
+          lbl.textContent = `🌙 End of Day ${d} · ${commute.toFixed(2)}h drive to ${eodDest}`;
+          const chk = document.createElement('span');
+          chk.className = 'eod-drive-check' + (isEodDone ? ' driven' : '');
+          chk.textContent = isEodDone ? '✓ Driven' : '○ Not driven yet';
+          chk.onclick = (e) => {
+            e.stopPropagation();
+            if (eodDriven.has(d)) eodDriven.delete(d);
+            else eodDriven.add(d);
+            saveCommutes(); rebuildAll();
+          };
+          sec.appendChild(lbl);
+          sec.appendChild(chk);
+          lastStop.after(sec);
+          // Hotel section
+          const hotelSec = document.createElement('div');
+          hotelSec.className = 'hotel-section';
+          if (hotel) {
+            const badge = document.createElement('span');
+            badge.className = 'hotel-badge';
+            badge.textContent = '🏨 ' + hotel.name;
+            const rm = document.createElement('span');
+            rm.className = 'hotel-remove';
+            rm.textContent = '✕';
+            rm.title = 'Remove overnight stop';
+            rm.onclick = () => { delete overnightStops[d]; saveHotels(); rebuildAll(); };
+            hotelSec.appendChild(badge);
+            hotelSec.appendChild(rm);
+          } else {
+            const addBtn = document.createElement('button');
+            addBtn.className = 'hotel-add-btn';
+            addBtn.textContent = '+ Set overnight stop';
+            addBtn.onclick = () => openHotelSearch(d, hotelSec);
+            hotelSec.appendChild(addBtn);
+          }
+          sec.after(hotelSec);
+        }
+      }
+    }
+    // Update meta
+    const nightStop = stops.length>0 ? stops[stops.length-1].dataset.name : '';
+    const isLast = d===TOTAL_DAYS;
+    const nightDisplay = (!isLast && overnightStops[d]) ? overnightStops[d].name : nightStop;
+    const meta = document.getElementById('day-meta-'+d);
+    if (meta) meta.innerHTML =
+      `~${(scoutH+driveH_).toFixed(1)} hrs &nbsp;·&nbsp; ${stops.length} stops &nbsp;·&nbsp; ${driveH_.toFixed(1)}h driving`
+      +`<span class="night-badge">${isLast?'🏁 End':'🏨 Night'}: ${nightDisplay}</span>`;
+    // Update Google Maps link
+    const gmBtn = document.getElementById('gmaps-'+d);
+    if (gmBtn && stops.length>0) {
+      let pts = stops.map(s=>s.dataset.name.replace(/ /g,'+')+',+'+STATE.replace(/ /g,'+'));
+      if (d>1) {
+        const prevList2 = document.getElementById('stop-list-'+(d-1));
+        if (prevList2) {
+          const prevStops = [...prevList2.querySelectorAll('.stop-row')];
+          if (prevStops.length>0)
+            pts.unshift(prevStops[prevStops.length-1].dataset.name.replace(/ /g,'+')+',+'+STATE.replace(/ /g,'+'));
+        }
+      }
+      gmBtn.href = 'https://www.google.com/maps/dir/'+pts.join('/');
+    }
+  }
+  updateBanner();
+  saveOrder();
+}
+
+// ── Progress tracking ─────────────────────────────────────────────────────────
+function saveProgress() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...completedSet]));
+}
+
+function updateBanner() {
+  const allStops = [...document.querySelectorAll('.stop-row')];
+  const done = allStops.filter(s=>completedSet.has(s.dataset.name)).length;
+  const total = allStops.length;
+  document.getElementById('done-count').innerHTML = done+' <span>/ '+total+'</span>';
+  document.getElementById('rem-count').innerHTML  = (total-done)+' <span>stops</span>';
+  const pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('master-fill').style.width = pct+'%';
+  document.getElementById('master-pct').textContent  = pct+'%';
+  for (let d=1; d<=TOTAL_DAYS; d++) {
+    const list = document.getElementById('stop-list-'+d);
+    if (!list) continue;
+    const stops = [...list.querySelectorAll('.stop-row')];
+    const dayDone = stops.filter(s=>completedSet.has(s.dataset.name)).length;
+    const fill = document.getElementById('day-prog-'+d);
+    const lbl  = document.getElementById('day-prog-label-'+d);
+    if (fill) fill.style.width = stops.length>0?(dayDone/stops.length*100)+'%':'0%';
+    if (lbl)  lbl.textContent  = dayDone+' / '+stops.length;
+  }
+  let activeDay=1;
+  for (let d=1; d<=TOTAL_DAYS; d++) {
+    const list = document.getElementById('stop-list-'+d);
+    if (!list) continue;
+    const stops = [...list.querySelectorAll('.stop-row')];
+    if (stops.some(s=>!completedSet.has(s.dataset.name))) { activeDay=d; break; }
+  }
+  document.getElementById('cur-day-label').textContent = 'Day '+activeDay;
+}
+
+function toggleStop(evt, el) {
+  if (evt.target.closest('.drag-handle')) return;
+  const name = el.dataset.name;
+  if (completedSet.has(name)) completedSet.delete(name);
+  else completedSet.add(name);
+  el.classList.toggle('done', completedSet.has(name));
+  saveProgress(); updateBanner();
+}
+
+// ── Order persistence ─────────────────────────────────────────────────────────
+function saveOrder() {
+  const order = [];
+  for (let d=1; d<=TOTAL_DAYS; d++) {
+    const list = document.getElementById('stop-list-'+d);
+    order.push(list ? [...list.querySelectorAll('.stop-row')].map(s=>s.dataset.name) : []);
+  }
+  localStorage.setItem(ORDER_KEY, JSON.stringify(order));
+}
+
+function loadOrder() {
+  const saved = localStorage.getItem(ORDER_KEY);
+  if (!saved) return;
+  try {
+    const order = JSON.parse(saved);
+    // Create any extra days that were added after generation
+    for (let d = TOTAL_DAYS + 1; d <= order.length; d++) createDayPanel(d);
+    order.forEach((names,di) => {
+      const list = document.getElementById('stop-list-'+(di+1));
+      if (!list) return;
+      names.forEach(name => {
+        const stop = document.querySelector(`.stop-row[data-name="${name}"]`);
+        if (stop) list.appendChild(stop);
+      });
+    });
+  } catch(e) { console.warn('Could not restore order:', e); }
+}
+
+// ── Overnight stop search ─────────────────────────────────────────────────────
+function openHotelSearch(d, container) {
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'hotel-search-wrap';
+  const input = document.createElement('input');
+  input.className = 'hotel-search-input';
+  input.placeholder = 'Search city, hotel, address…';
+  input.type = 'text';
+  const results = document.createElement('div');
+  results.className = 'hotel-results';
+  wrap.appendChild(input);
+  wrap.appendChild(results);
+  container.appendChild(wrap);
+  input.focus();
+  let timer;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 3) { results.innerHTML = ''; return; }
+    timer = setTimeout(async () => {
+      results.innerHTML = '<div class="hotel-result muted">Searching…</div>';
+      try {
+        const data = await fetch('/api/places_search?q=' + encodeURIComponent(q)).then(r=>r.json());
+        results.innerHTML = '';
+        if (data.error) {
+          results.innerHTML = `<div class="hotel-result muted">${data.error}</div>`;
+          return;
+        }
+        if (!data.length) {
+          results.innerHTML = '<div class="hotel-result muted">No results found</div>';
+          return;
+        }
+        data.forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'hotel-result';
+          el.innerHTML = `<strong>${item.name}</strong><br><span style="font-size:.7rem;opacity:.6">${item.address}</span>`;
+          el.onclick = () => {
+            overnightStops[d] = {name: item.name, lat: item.lat, lon: item.lon};
+            saveHotels();
+            rebuildAll();
+          };
+          results.appendChild(el);
+        });
+      } catch(e) {
+        results.innerHTML = '<div class="hotel-result muted">Search failed — check connection</div>';
+      }
+    }, 400);
+  });
+  input.addEventListener('keydown', e => { if (e.key==='Escape') rebuildAll(); });
+}
+
+// ── Day tab switching ─────────────────────────────────────────────────────────
+function switchDay(d) {
+  document.querySelectorAll('.day-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));
+  const panel=document.getElementById('panel-'+d), tab=document.getElementById('tab-'+d);
+  if (panel) panel.classList.add('active');
+  if (tab)   tab.classList.add('active');
+}
+
+// ── Sortable drag-between-days ────────────────────────────────────────────────
+function initSortable(d) {
+  const list = document.getElementById('stop-list-'+d);
+  if (list) Sortable.create(list, {
+    group:      'stops',
+    handle:     '.drag-handle',
+    animation:  150,
+    ghostClass: 'sortable-ghost',
+    chosenClass:'sortable-chosen',
+    onEnd: (evt) => {
+      if (evt.from !== evt.to) {
+        const fromDay = parseInt(evt.from.id.replace('stop-list-',''));
+        const toDay   = parseInt(evt.to.id.replace('stop-list-',''));
+        if (toDay > fromDay) {
+          const firstStop = evt.to.querySelector('.stop-row');
+          if (firstStop && firstStop !== evt.item) evt.to.insertBefore(evt.item, firstStop);
+        }
+      }
+      rebuildAll();
+    },
+  });
+}
+for (let d=1; d<=TOTAL_DAYS; d++) initSortable(d);
+
+// ── Add Day ───────────────────────────────────────────────────────────────────
+function createDayPanel(d) {
+  if (document.getElementById('panel-'+d)) return;
+  TOTAL_DAYS = Math.max(TOTAL_DAYS, d);
+  const dayNum = String(d).padStart(2,'0');
+  // Tab
+  const tab = document.createElement('button');
+  tab.className = 'day-tab';
+  tab.id = 'tab-'+d;
+  tab.textContent = 'Day '+d;
+  tab.onclick = () => switchDay(d);
+  document.getElementById('add-day-btn').before(tab);
+  // Panel
+  const panel = document.createElement('div');
+  panel.className = 'day-panel';
+  panel.id = 'panel-'+d;
+  panel.innerHTML =
+    `<div class="day-header"><div>`+
+    `<div class="day-title"><span>${dayNum}</span> Day ${d}</div>`+
+    `<div class="day-meta" id="day-meta-${d}"></div></div>`+
+    `<a class="gmaps-btn" id="gmaps-${d}" href="#" target="_blank">Open in Maps ↗</a></div>`+
+    `<div class="day-progress"><div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-${d}"></div></div>`+
+    `<div class="day-prog-label" id="day-prog-label-${d}">0 / 0</div></div>`+
+    `<div class="stop-list" id="stop-list-${d}"></div>`;
+  const prevPanel = document.getElementById('panel-'+(d-1));
+  if (prevPanel) prevPanel.after(panel);
+  initSortable(d);
+}
+
+function addDay() {
+  createDayPanel(TOTAL_DAYS + 1);
+  switchDay(TOTAL_DAYS);
+  rebuildAll();
+  saveOrder();
+}
+
+// ── Change day for a stop ─────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const dayEl = e.target.closest('.stop-day');
+  if (!dayEl || dayEl.querySelector('input')) return;
+  e.stopPropagation();
+  const stopRow    = dayEl.closest('.stop-row');
+  const currentDay = parseInt(stopRow.dataset.day);
+  const input = document.createElement('input');
+  input.type  = 'number';
+  input.min   = 1;
+  input.max   = TOTAL_DAYS;
+  input.value = currentDay;
+  input.style.cssText = 'width:28px;background:var(--surface2);color:var(--sky);border:1px solid var(--sky);border-radius:3px;font-family:"DM Mono",monospace;font-size:.62rem;text-align:center;padding:1px 2px;outline:none;';
+  dayEl.textContent = '';
+  dayEl.appendChild(input);
+  input.focus();
+  input.select();
+  let committed = false;
+  const commit = () => {
+    if (committed) return;
+    committed = true;
+    const newDay = parseInt(input.value);
+    if (!isNaN(newDay) && newDay >= 1 && newDay <= TOTAL_DAYS && newDay !== currentDay) {
+      const targetList = document.getElementById('stop-list-' + newDay);
+      if (targetList) {
+        if (newDay > currentDay) {
+          // Moving forward → morning arrival → top of destination day
+          const firstStop = targetList.querySelector('.stop-row');
+          if (firstStop) targetList.insertBefore(stopRow, firstStop);
+          else targetList.appendChild(stopRow);
+        } else {
+          // Moving backward → evening drive → end of destination day
+          targetList.appendChild(stopRow);
+        }
+        rebuildAll();
+      }
+    } else {
+      dayEl.textContent = 'D' + currentDay;
+    }
+  };
+  input.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter')  { ev.preventDefault(); commit(); }
+    if (ev.key === 'Escape') { committed = true; dayEl.textContent = 'D' + currentDay; }
+  });
+  input.addEventListener('blur', commit);
+});
+
+// ── Move stop to explicit position ───────────────────────────────────────────
+function moveStopToPosition(stopEl, newPos) {
+  const allStops = [];
+  const daySizes = [];
+  for (let d = 1; d <= TOTAL_DAYS; d++) {
+    const list = document.getElementById('stop-list-' + d);
+    if (!list) { daySizes.push(0); continue; }
+    const stops = [...list.querySelectorAll('.stop-row')];
+    daySizes.push(stops.length);
+    allStops.push(...stops);
+  }
+  const fromIdx = allStops.indexOf(stopEl);
+  const toIdx   = Math.max(0, Math.min(allStops.length - 1, newPos - 1));
+  if (fromIdx === toIdx) return;
+  allStops.splice(fromIdx, 1);
+  allStops.splice(toIdx, 0, stopEl);
+  let si = 0;
+  for (let d = 1; d <= TOTAL_DAYS; d++) {
+    const list = document.getElementById('stop-list-' + d);
+    if (!list) { si += daySizes[d-1]; continue; }
+    list.querySelectorAll('.stop-row').forEach(r => r.remove());
+    for (let i = 0; i < daySizes[d-1]; i++) {
+      if (si < allStops.length) list.appendChild(allStops[si++]);
+    }
+  }
+  rebuildAll();
+}
+
+document.addEventListener('click', function(e) {
+  const numEl = e.target.closest('.stop-num');
+  if (!numEl || numEl.querySelector('input')) return;
+  e.stopPropagation();
+  const stopRow   = numEl.closest('.stop-row');
+  const currentNum = parseInt(numEl.textContent);
+  const total     = document.querySelectorAll('.stop-row').length;
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.min  = 1;
+  input.max  = total;
+  input.value = currentNum;
+  input.style.cssText = 'width:34px;background:var(--surface2);color:var(--gold);border:1px solid var(--gold);border-radius:3px;font-family:"DM Mono",monospace;font-size:.7rem;text-align:center;padding:1px 2px;outline:none;';
+  numEl.textContent = '';
+  numEl.appendChild(input);
+  input.focus();
+  input.select();
+  let committed = false;
+  const commit = () => {
+    if (committed) return;
+    committed = true;
+    const newPos = parseInt(input.value);
+    if (!isNaN(newPos) && newPos >= 1 && newPos <= total && newPos !== currentNum) {
+      moveStopToPosition(stopRow, newPos);
+    } else {
+      numEl.textContent = String(currentNum).padStart(2, '0');
+    }
+  };
+  input.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter')  { ev.preventDefault(); commit(); }
+    if (ev.key === 'Escape') { committed = true; numEl.textContent = String(currentNum).padStart(2,'0'); }
+  });
+  input.addEventListener('blur', commit);
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadOrder();
+completedSet.forEach(name => {
+  const el = document.querySelector(`.stop-row[data-name="${name}"]`);
+  if (el) el.classList.add('done');
+});
+rebuildAll();
+</script>
+</body>
+</html>

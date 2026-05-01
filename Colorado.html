@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colorado · Scout Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #f5a623; --gold-dim: #b87d1a; --gold-pale: rgba(245,166,35,0.10);
+  --gold-glow: rgba(245,166,35,0.22); --sky: #4ab3d8; --sky-pale: rgba(74,179,216,0.12);
+  --green: #3ecf6e; --green-pale: rgba(62,207,110,0.12); --red: #e05a5a;
+  --bg: #0b0d0f; --surface: #111416; --surface2: #181b1e;
+  --border: rgba(245,166,35,0.10); --border-strong: rgba(245,166,35,0.22);
+  --text: #e8e0d0; --muted: #7a6e5e; --muted2: #4a4438;
+}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+body::before { content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
+  background-size: 48px 48px; pointer-events: none; z-index: 0; }
+body::after { content: ''; position: fixed; top: -300px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse, rgba(245,166,35,0.05) 0%, transparent 65%);
+  pointer-events: none; z-index: 0; }
+.app { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; position: relative; z-index: 1; }
+header { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 24px;
+  margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+.brand-tag { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em;
+  color: var(--gold); text-transform: uppercase; margin-bottom: 6px; opacity: 0.7; }
+.brand h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 7vw, 5rem);
+  line-height: 0.9; letter-spacing: 0.04em; color: var(--gold);
+  filter: drop-shadow(0 0 40px rgba(245,166,35,0.3)); }
+.brand h1 span { color: var(--sky); filter: drop-shadow(0 0 20px rgba(74,179,216,0.4)); }
+.brand-sub { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted);
+  letter-spacing: 0.12em; margin-top: 8px; }
+.header-stats { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.hstat { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; }
+.hstat strong { color: var(--text); font-weight: 500; }
+.progress-banner { background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: 12px; padding: 20px 24px; margin-bottom: 28px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; align-items: center; }
+.pstat { display: flex; flex-direction: column; gap: 2px; }
+.pstat-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted);
+  letter-spacing: 0.15em; text-transform: uppercase; }
+.pstat-value { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; letter-spacing: 0.05em; line-height: 1; }
+.pstat-value.gold { color: var(--gold); } .pstat-value.sky { color: var(--sky); }
+.pstat-value.green { color: var(--green); }
+.progress-bar-wrap { grid-column: 1 / -1; height: 6px; background: var(--surface2);
+  border-radius: 4px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--sky));
+  border-radius: 4px; width: 0%; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.reset-btn { background: transparent; border: 1px solid var(--border-strong); color: var(--muted);
+  font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+  text-transform: uppercase; white-space: nowrap; }
+.reset-btn:hover { border-color: var(--red); color: var(--red); }
+.day-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.day-tab { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 7px 16px; border-radius: 20px;
+  border: 1px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all 0.2s; }
+.day-tab:hover { border-color: var(--gold-dim); color: var(--text); }
+.day-tab.active { background: var(--gold-pale); border-color: var(--gold); color: var(--gold); }
+.day-tab.complete { background: var(--green-pale); border-color: var(--green); color: var(--green); }
+.day-panel { display: none; } .day-panel.active { display: block; }
+.day-header { display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.day-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.06em; color: var(--text); }
+.day-title span { color: var(--gold); margin-right: 8px; }
+.day-meta { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted);
+  letter-spacing: 0.1em; display: flex; gap: 16px; align-items: center; }
+.day-meta .night-badge { background: var(--sky-pale); border: 1px solid rgba(74,179,216,0.3);
+  color: var(--sky); padding: 3px 10px; border-radius: 12px; font-size: 0.65rem; letter-spacing: 0.12em; }
+.gmaps-btn { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 6px 14px; border-radius: 6px;
+  border: 1px solid rgba(74,179,216,0.35); color: var(--sky); background: var(--sky-pale);
+  text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+.gmaps-btn:hover { background: rgba(74,179,216,0.2); border-color: var(--sky); }
+.stop-list { display: flex; flex-direction: column; gap: 3px; }
+.travel-row { display: flex; align-items: center; gap: 8px; padding: 4px 16px;
+  color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; }
+.travel-row::before { content: ''; display: block; width: 1px; height: 14px;
+  background: var(--border); margin-left: 19px; }
+.stop-row { display: grid; grid-template-columns: 40px 1fr auto auto auto; align-items: center;
+  gap: 12px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface); cursor: pointer; transition: all 0.2s; user-select: none; }
+.stop-row:hover { border-color: var(--border-strong); background: var(--surface2); }
+.stop-row.completed { border-color: rgba(62,207,110,0.2); background: rgba(62,207,110,0.05); opacity: 0.65; }
+.stop-row.completed .stop-name { text-decoration: line-through; color: var(--muted); }
+.stop-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--muted);
+  letter-spacing: 0.05em; text-align: center; }
+.stop-row.completed .stop-num { color: var(--green); }
+.stop-name { font-size: 0.92rem; font-weight: 500; color: var(--text); transition: color 0.2s; }
+.stop-badge { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 10px; }
+.badge-large { background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); color: var(--gold); }
+.badge-medium { background: rgba(74,179,216,0.1); border: 1px solid rgba(74,179,216,0.25); color: var(--sky); }
+.badge-small { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+.stop-time { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted);
+  letter-spacing: 0.05em; white-space: nowrap; min-width: 36px; text-align: right; }
+.check-icon { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all 0.2s; font-size: 0.6rem; }
+.stop-row.completed .check-icon { background: var(--green); border-color: var(--green); color: #000; }
+.day-progress { margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+.day-prog-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.day-prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--sky));
+  border-radius: 3px; width: 0%; transition: width 0.5s ease; }
+.day-prog-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted);
+  letter-spacing: 0.08em; white-space: nowrap; }
+.confetti-piece { position: fixed; border-radius: 2px; animation: confettiFall linear forwards;
+  pointer-events: none; z-index: 9999; }
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+@media (max-width: 600px) {
+  .progress-banner { grid-template-columns: 1fr 1fr; }
+  .stop-row { grid-template-columns: 32px 1fr auto; }
+  .stop-time { display: none; } header { grid-template-columns: 1fr; }
+  .header-stats { align-items: flex-start; flex-direction: row; flex-wrap: wrap; gap: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-tag">Scout Route Tracker</div>
+      <h1>Colorado</h1>
+      <div class="brand-sub">26 STOPS · GRAND JUNCTION CITY → ROXBOROUGH PARK CDP · 3884.4 MI</div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">Total Scout Time: <strong>16.0 hrs</strong></div>
+      <div class="hstat">Total Drive Time: <strong>~104.2 hrs</strong></div>
+      <div class="hstat">Total Days: <strong>11</strong></div>
+      <div class="hstat">Stops Remaining: <strong id="hdr-remaining">26</strong></div>
+    </div>
+  </header>
+
+  <div class="progress-banner">
+    <div class="pstat">
+      <div class="pstat-label">Completed</div>
+      <div class="pstat-value gold" id="stat-done">0</div>
+    </div>
+    <div class="pstat">
+      <div class="pstat-label">Remaining</div>
+      <div class="pstat-value sky" id="stat-left">26</div>
+    </div>
+    <div class="pstat">
+      <div class="pstat-label">Progress</div>
+      <div class="pstat-value green" id="stat-pct">0%</div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">Reset All</button>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="main-progress"></div>
+    </div>
+  </div>
+
+  <div class="day-tabs">
+    <button class="day-tab active" onclick="switchDay(1)" id="tab-1">Day 1</button>
+    <button class="day-tab" onclick="switchDay(2)" id="tab-2">Day 2</button>
+    <button class="day-tab" onclick="switchDay(3)" id="tab-3">Day 3</button>
+    <button class="day-tab" onclick="switchDay(4)" id="tab-4">Day 4</button>
+    <button class="day-tab" onclick="switchDay(5)" id="tab-5">Day 5</button>
+    <button class="day-tab" onclick="switchDay(6)" id="tab-6">Day 6</button>
+    <button class="day-tab" onclick="switchDay(7)" id="tab-7">Day 7</button>
+    <button class="day-tab" onclick="switchDay(8)" id="tab-8">Day 8</button>
+    <button class="day-tab" onclick="switchDay(9)" id="tab-9">Day 9</button>
+    <button class="day-tab" onclick="switchDay(10)" id="tab-10">Day 10</button>
+    <button class="day-tab" onclick="switchDay(11)" id="tab-11">Day 11</button>
+  </div>
+
+
+  <!-- DAY 1 -->
+  <div class="day-panel active" id="panel-1">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>01</span> Day 1</div>
+        <div class="day-meta">
+          ~9.9 hrs &nbsp;·&nbsp; 3 stops &nbsp;·&nbsp; 6.9h driving
+          <span class="night-badge">🏨 Night: Longmont city</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Grand+Junction+city,+Colorado/Boulder+city,+Colorado/Longmont+city,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-1"></div></div>
+      <div class="day-prog-label" id="day-prog-label-1">0 / 3</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="1" data-day="1" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">01</div>
+        <div class="stop-name">Grand Junction city</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">5.05h drive</div>
+      <div class="stop-row" data-stop="2" data-day="1" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">02</div>
+        <div class="stop-name">Boulder city</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">0.33h drive</div>
+      <div class="stop-row" data-stop="3" data-day="1" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">03</div>
+        <div class="stop-name">Longmont city</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 2 -->
+  <div class="day-panel" id="panel-2">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>02</span> Day 2</div>
+        <div class="day-meta">
+          ~8.1 hrs &nbsp;·&nbsp; 2 stops &nbsp;·&nbsp; 6.1h driving
+          <span class="night-badge">🏨 Night: Pueblo city</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Longmont+city,+Colorado/Castle+Rock+town,+Colorado/Pueblo+city,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-2"></div></div>
+      <div class="day-prog-label" id="day-prog-label-2">0 / 2</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="4" data-day="2" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">04</div>
+        <div class="stop-name">Castle Rock town</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">2.09h drive</div>
+      <div class="stop-row" data-stop="5" data-day="2" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">05</div>
+        <div class="stop-name">Pueblo city</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 3 -->
+  <div class="day-panel" id="panel-3">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>03</span> Day 3</div>
+        <div class="day-meta">
+          ~12.1 hrs &nbsp;·&nbsp; 2 stops &nbsp;·&nbsp; 10.6h driving
+          <span class="night-badge">🏨 Night: Walsh town</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Pueblo+city,+Colorado/Greeley+city,+Colorado/Walsh+town,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-3"></div></div>
+      <div class="day-prog-label" id="day-prog-label-3">0 / 2</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="6" data-day="3" data-min="60" onclick="toggleStop(this)">
+        <div class="stop-num">06</div>
+        <div class="stop-name">Greeley city</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">6.66h drive</div>
+      <div class="stop-row" data-stop="7" data-day="3" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">07</div>
+        <div class="stop-name">Walsh town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 4 -->
+  <div class="day-panel" id="panel-4">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>04</span> Day 4</div>
+        <div class="day-meta">
+          ~14.8 hrs &nbsp;·&nbsp; 2 stops &nbsp;·&nbsp; 13.8h driving
+          <span class="night-badge">🏨 Night: Towaoc CDP</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Walsh+town,+Colorado/Pueblo+West+CDP,+Colorado/Towaoc+CDP,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-4"></div></div>
+      <div class="day-prog-label" id="day-prog-label-4">0 / 2</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="8" data-day="4" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">08</div>
+        <div class="stop-name">Pueblo West CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">6.28h drive</div>
+      <div class="stop-row" data-stop="9" data-day="4" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">09</div>
+        <div class="stop-name">Towaoc CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 5 -->
+  <div class="day-panel" id="panel-5">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>05</span> Day 5</div>
+        <div class="day-meta">
+          ~13.6 hrs &nbsp;·&nbsp; 3 stops &nbsp;·&nbsp; 12.1h driving
+          <span class="night-badge">🏨 Night: Clifton CDP</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Towaoc+CDP,+Colorado/Erie+town,+Colorado/Hayden+town,+Colorado/Clifton+CDP,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-5"></div></div>
+      <div class="day-prog-label" id="day-prog-label-5">0 / 3</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="10" data-day="5" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">10</div>
+        <div class="stop-name">Erie town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">3.20h drive</div>
+      <div class="stop-row" data-stop="11" data-day="5" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">11</div>
+        <div class="stop-name">Hayden town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">3.14h drive</div>
+      <div class="stop-row" data-stop="12" data-day="5" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">12</div>
+        <div class="stop-name">Clifton CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 6 -->
+  <div class="day-panel" id="panel-6">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>06</span> Day 6</div>
+        <div class="day-meta">
+          ~16.2 hrs &nbsp;·&nbsp; 3 stops &nbsp;·&nbsp; 14.7h driving
+          <span class="night-badge">🏨 Night: Cheyenne Wells town</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Clifton+CDP,+Colorado/Wellington+town,+Colorado/Perry+Park+CDP,+Colorado/Cheyenne+Wells+town,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-6"></div></div>
+      <div class="day-prog-label" id="day-prog-label-6">0 / 3</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="13" data-day="6" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">13</div>
+        <div class="stop-name">Wellington town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">2.67h drive</div>
+      <div class="stop-row" data-stop="14" data-day="6" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">14</div>
+        <div class="stop-name">Perry Park CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">3.87h drive</div>
+      <div class="stop-row" data-stop="15" data-day="6" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">15</div>
+        <div class="stop-name">Cheyenne Wells town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 7 -->
+  <div class="day-panel" id="panel-7">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>07</span> Day 7</div>
+        <div class="day-meta">
+          ~11.0 hrs &nbsp;·&nbsp; 2 stops &nbsp;·&nbsp; 10.0h driving
+          <span class="night-badge">🏨 Night: Frederick town</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Cheyenne+Wells+town,+Colorado/Battlement+Mesa+CDP,+Colorado/Frederick+town,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-7"></div></div>
+      <div class="day-prog-label" id="day-prog-label-7">0 / 2</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="16" data-day="7" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">16</div>
+        <div class="stop-name">Battlement Mesa CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">4.50h drive</div>
+      <div class="stop-row" data-stop="17" data-day="7" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">17</div>
+        <div class="stop-name">Frederick town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 8 -->
+  <div class="day-panel" id="panel-8">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>08</span> Day 8</div>
+        <div class="day-meta">
+          ~9.5 hrs &nbsp;·&nbsp; 3 stops &nbsp;·&nbsp; 8.0h driving
+          <span class="night-badge">🏨 Night: Blue River town</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Frederick+town,+Colorado/La+Jara+town,+Colorado/Kittredge+CDP,+Colorado/Blue+River+town,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-8"></div></div>
+      <div class="day-prog-label" id="day-prog-label-8">0 / 3</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="18" data-day="8" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">18</div>
+        <div class="stop-name">La Jara town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">4.52h drive</div>
+      <div class="stop-row" data-stop="19" data-day="8" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">19</div>
+        <div class="stop-name">Kittredge CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">1.13h drive</div>
+      <div class="stop-row" data-stop="20" data-day="8" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">20</div>
+        <div class="stop-name">Blue River town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 9 -->
+  <div class="day-panel" id="panel-9">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>09</span> Day 9</div>
+        <div class="day-meta">
+          ~8.7 hrs &nbsp;·&nbsp; 2 stops &nbsp;·&nbsp; 7.7h driving
+          <span class="night-badge">🏨 Night: Salt Creek CDP</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Blue+River+town,+Colorado/Bennett+town,+Colorado/Salt+Creek+CDP,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-9"></div></div>
+      <div class="day-prog-label" id="day-prog-label-9">0 / 2</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="21" data-day="9" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">21</div>
+        <div class="stop-name">Bennett town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">2.81h drive</div>
+      <div class="stop-row" data-stop="22" data-day="9" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">22</div>
+        <div class="stop-name">Salt Creek CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 10 -->
+  <div class="day-panel" id="panel-10">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>10</span> Day 10</div>
+        <div class="day-meta">
+          ~10.7 hrs &nbsp;·&nbsp; 2 stops &nbsp;·&nbsp; 9.7h driving
+          <span class="night-badge">🏨 Night: Hot Sulphur Springs town</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Salt+Creek+CDP,+Colorado/Ignacio+town,+Colorado/Hot+Sulphur+Springs+town,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-10"></div></div>
+      <div class="day-prog-label" id="day-prog-label-10">0 / 2</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="23" data-day="10" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">23</div>
+        <div class="stop-name">Ignacio town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">5.91h drive</div>
+      <div class="stop-row" data-stop="24" data-day="10" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">24</div>
+        <div class="stop-name">Hot Sulphur Springs town</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 11 -->
+  <div class="day-panel" id="panel-11">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>11</span> Day 11</div>
+        <div class="day-meta">
+          ~5.5 hrs &nbsp;·&nbsp; 2 stops &nbsp;·&nbsp; 4.5h driving
+          <span class="night-badge">🏁 End: Roxborough Park CDP</span>
+        </div>
+      </div>
+      <a class="gmaps-btn" href="https://www.google.com/maps/dir/Hot+Sulphur+Springs+town,+Colorado/Delta+city,+Colorado/Roxborough+Park+CDP,+Colorado" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-11"></div></div>
+      <div class="day-prog-label" id="day-prog-label-11">0 / 2</div>
+    </div>
+    <div class="stop-list">
+
+      <div class="stop-row" data-stop="25" data-day="11" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">25</div>
+        <div class="stop-name">Delta city</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+      <div class="travel-row">4.51h drive</div>
+      <div class="stop-row" data-stop="26" data-day="11" data-min="30" onclick="toggleStop(this)">
+        <div class="stop-num">26</div>
+        <div class="stop-name">Roxborough Park CDP</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const TOTAL = 26;
+const DAY_COUNTS = {1: 3, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 2, 8: 3, 9: 2, 10: 2, 11: 2};
+let completed = new Set();
+
+function save() {
+  try { localStorage.setItem('colorado_1h26', JSON.stringify([...completed])); } catch(e){}
+}
+function load() {
+  try {
+    const d = localStorage.getItem('colorado_1h26');
+    if (d) completed = new Set(JSON.parse(d));
+  } catch(e){}
+}
+
+function toggleStop(row) {
+  const n = parseInt(row.dataset.stop);
+  if (completed.has(n)) { completed.delete(n); }
+  else { completed.add(n); }
+  save(); update();
+  if (completed.size === TOTAL) setTimeout(celebrate, 300);
+}
+
+function resetAll() {
+  if (confirm('Reset all progress?')) { completed.clear(); save(); update(); }
+}
+
+function switchDay(d) {
+  document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + d).classList.add('active');
+  document.getElementById('tab-' + d).classList.add('active');
+}
+
+function update() {
+  const done = completed.size;
+  const left = TOTAL - done;
+  const pct  = Math.round((done / TOTAL) * 100);
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-left').textContent = left;
+  document.getElementById('stat-pct').textContent  = pct + '%';
+  document.getElementById('hdr-remaining').textContent = left;
+  document.getElementById('main-progress').style.width = pct + '%';
+  document.querySelectorAll('.stop-row').forEach(row => {
+    row.classList.toggle('completed', completed.has(parseInt(row.dataset.stop)));
+  });
+  const totalDays = 11;
+  for (let d = 1; d <= totalDays; d++) {
+    const rows   = document.querySelectorAll(`[data-day="${d}"]`);
+    const total  = rows.length;
+    let done_d   = 0;
+    rows.forEach(r => { if (completed.has(parseInt(r.dataset.stop))) done_d++; });
+    const pct_d  = total > 0 ? (done_d / total) * 100 : 0;
+    document.getElementById('day-prog-'       + d).style.width  = pct_d + '%';
+    document.getElementById('day-prog-label-' + d).textContent  = done_d + ' / ' + total;
+    const tab = document.getElementById('tab-' + d);
+    tab.classList.remove('complete');
+    if (done_d === total && total > 0) tab.classList.add('complete');
+  }
+}
+
+function celebrate() {
+  const colors = ['#f5a623','#4ab3d8','#3ecf6e','#e05a5a','#ffffff'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${Math.random()*100}vw;top:-20px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.8}s;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'2px'}`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+
+load();
+setTimeout(update, 100);
+</script>
+</body>
+</html>
