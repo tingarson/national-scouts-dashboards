@@ -393,7 +393,7 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     </div>
     <div class="header-stats">
       <div class="hstat">Stops <strong>32</strong></div>
-      <div class="hstat">Days <strong>6</strong></div>
+      <div class="hstat">Days <strong>7</strong></div>
       <div class="hstat">Distance <strong>970 mi</strong></div>
       <div class="hstat">Scout time <strong>24 h</strong></div>
       <div class="hstat">Drive time <strong>26 h</strong></div>
@@ -426,6 +426,7 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     <button class="day-tab" onclick="switchDay(4)" id="tab-4">Day 4</button>
     <button class="day-tab" onclick="switchDay(5)" id="tab-5">Day 5</button>
     <button class="day-tab" onclick="switchDay(6)" id="tab-6">Day 6</button>
+    <button class="day-tab" onclick="switchDay(7)" id="tab-7">Day 7</button>
     <button class="add-day-btn" id="add-day-btn" onclick="addDay()">+ Add Day</button>
   </div>
 
@@ -517,7 +518,7 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     </div>
     <div class="day-progress">
       <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-2"></div></div>
-      <div class="day-prog-label" id="day-prog-label-2">0 / 6</div>
+      <div class="day-prog-label" id="day-prog-label-2">0 / 5</div>
     </div>
     <div class="stop-list" id="stop-list-2">
 
@@ -571,16 +572,6 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="12" data-day="2" data-name="Leonville" data-lat="30.467171999999998" data-lon="-91.98062363117876" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
-        <div class="drag-handle" title="Drag to reorder">⠿</div>
-        <div class="stop-num">12</div>
-        <div class="stop-day" title="Click to change day">D2</div>
-        <div class="stop-name">Leonville</div>
-        <div class="stop-badge badge-small">Small</div>
-        <div class="stop-time">0h 30m</div>
-        <div class="check-icon">✓</div>
-        <div class="eod-moon" title="End of day here">🌙</div>
-      </div>
     </div>
   </div>
 
@@ -598,6 +589,16 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     </div>
     <div class="stop-list" id="stop-list-3">
 
+      <div class="stop-row" data-stop="12" data-day="3" data-name="Leonville" data-lat="30.467171999999998" data-lon="-91.98062363117876" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">12</div>
+        <div class="stop-day" title="Click to change day">D3</div>
+        <div class="stop-name">Leonville</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
       <div class="stop-row" data-stop="13" data-day="3" data-name="New Roads" data-lat="30.693706" data-lon="-91.4520597424353" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">13</div>
@@ -638,16 +639,6 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="17" data-day="3" data-name="Greensburg" data-lat="30.830826000000002" data-lon="-90.66850478823812" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
-        <div class="drag-handle" title="Drag to reorder">⠿</div>
-        <div class="stop-num">17</div>
-        <div class="stop-day" title="Click to change day">D3</div>
-        <div class="stop-name">Greensburg</div>
-        <div class="stop-badge badge-small">Small</div>
-        <div class="stop-time">0h 30m</div>
-        <div class="check-icon">✓</div>
-        <div class="eod-moon" title="End of day here">🌙</div>
-      </div>
     </div>
   </div>
 
@@ -661,10 +652,20 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     </div>
     <div class="day-progress">
       <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-4"></div></div>
-      <div class="day-prog-label" id="day-prog-label-4">0 / 5</div>
+      <div class="day-prog-label" id="day-prog-label-4">0 / 4</div>
     </div>
     <div class="stop-list" id="stop-list-4">
 
+      <div class="stop-row" data-stop="17" data-day="4" data-name="Greensburg" data-lat="30.830826000000002" data-lon="-90.66850478823812" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">17</div>
+        <div class="stop-day" title="Click to change day">D4</div>
+        <div class="stop-name">Greensburg</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
       <div class="stop-row" data-stop="18" data-day="4" data-name="Simmesport" data-lat="30.979357" data-lon="-91.81185541544744" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">18</div>
@@ -695,26 +696,6 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="21" data-day="4" data-name="Monroe" data-lat="32.5345235" data-lon="-92.09355171379366" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
-        <div class="drag-handle" title="Drag to reorder">⠿</div>
-        <div class="stop-num">21</div>
-        <div class="stop-day" title="Click to change day">D4</div>
-        <div class="stop-name">Monroe</div>
-        <div class="stop-badge badge-medium">Medium</div>
-        <div class="stop-time">1h 00m</div>
-        <div class="check-icon">✓</div>
-        <div class="eod-moon" title="End of day here">🌙</div>
-      </div>
-      <div class="stop-row" data-stop="22" data-day="4" data-name="Ruston" data-lat="32.528737" data-lon="-92.6313964521661" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
-        <div class="drag-handle" title="Drag to reorder">⠿</div>
-        <div class="stop-num">22</div>
-        <div class="stop-day" title="Click to change day">D4</div>
-        <div class="stop-name">Ruston</div>
-        <div class="stop-badge badge-medium">Medium</div>
-        <div class="stop-time">1h 00m</div>
-        <div class="check-icon">✓</div>
-        <div class="eod-moon" title="End of day here">🌙</div>
-      </div>
     </div>
   </div>
 
@@ -728,10 +709,30 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     </div>
     <div class="day-progress">
       <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-5"></div></div>
-      <div class="day-prog-label" id="day-prog-label-5">0 / 5</div>
+      <div class="day-prog-label" id="day-prog-label-5">0 / 4</div>
     </div>
     <div class="stop-list" id="stop-list-5">
 
+      <div class="stop-row" data-stop="21" data-day="5" data-name="Monroe" data-lat="32.5345235" data-lon="-92.09355171379366" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">21</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Monroe</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="22" data-day="5" data-name="Ruston" data-lat="32.528737" data-lon="-92.6313964521661" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">22</div>
+        <div class="stop-day" title="Click to change day">D5</div>
+        <div class="stop-name">Ruston</div>
+        <div class="stop-badge badge-medium">Medium</div>
+        <div class="stop-time">1h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
       <div class="stop-row" data-stop="23" data-day="5" data-name="Grambling" data-lat="32.526086" data-lon="-92.71459491747756" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">23</div>
@@ -752,36 +753,6 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="25" data-day="5" data-name="Lakeview" data-lat="32.525914" data-lon="-93.83116730320407" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
-        <div class="drag-handle" title="Drag to reorder">⠿</div>
-        <div class="stop-num">25</div>
-        <div class="stop-day" title="Click to change day">D5</div>
-        <div class="stop-name">Lakeview</div>
-        <div class="stop-badge badge-small">Small</div>
-        <div class="stop-time">0h 30m</div>
-        <div class="check-icon">✓</div>
-        <div class="eod-moon" title="End of day here">🌙</div>
-      </div>
-      <div class="stop-row" data-stop="26" data-day="5" data-name="Shreveport" data-lat="32.467681" data-lon="-93.79365495067862" data-min="120" data-size="Large" onclick="toggleStop(event,this)">
-        <div class="drag-handle" title="Drag to reorder">⠿</div>
-        <div class="stop-num">26</div>
-        <div class="stop-day" title="Click to change day">D5</div>
-        <div class="stop-name">Shreveport</div>
-        <div class="stop-badge badge-large">Large</div>
-        <div class="stop-time">2h 00m</div>
-        <div class="check-icon">✓</div>
-        <div class="eod-moon" title="End of day here">🌙</div>
-      </div>
-      <div class="stop-row" data-stop="27" data-day="5" data-name="Pleasant Hill" data-lat="31.8166395" data-lon="-93.51686158692269" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
-        <div class="drag-handle" title="Drag to reorder">⠿</div>
-        <div class="stop-num">27</div>
-        <div class="stop-day" title="Click to change day">D5</div>
-        <div class="stop-name">Pleasant Hill</div>
-        <div class="stop-badge badge-small">Small</div>
-        <div class="stop-time">0h 30m</div>
-        <div class="check-icon">✓</div>
-        <div class="eod-moon" title="End of day here">🌙</div>
-      </div>
     </div>
   </div>
 
@@ -795,10 +766,40 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     </div>
     <div class="day-progress">
       <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-6"></div></div>
-      <div class="day-prog-label" id="day-prog-label-6">0 / 5</div>
+      <div class="day-prog-label" id="day-prog-label-6">0 / 4</div>
     </div>
     <div class="stop-list" id="stop-list-6">
 
+      <div class="stop-row" data-stop="25" data-day="6" data-name="Lakeview" data-lat="32.525914" data-lon="-93.83116730320407" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">25</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Lakeview</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="26" data-day="6" data-name="Shreveport" data-lat="32.467681" data-lon="-93.79365495067862" data-min="120" data-size="Large" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">26</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Shreveport</div>
+        <div class="stop-badge badge-large">Large</div>
+        <div class="stop-time">2h 00m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
+      <div class="stop-row" data-stop="27" data-day="6" data-name="Pleasant Hill" data-lat="31.8166395" data-lon="-93.51686158692269" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+        <div class="stop-num">27</div>
+        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-name">Pleasant Hill</div>
+        <div class="stop-badge badge-small">Small</div>
+        <div class="stop-time">0h 30m</div>
+        <div class="check-icon">✓</div>
+        <div class="eod-moon" title="End of day here">🌙</div>
+      </div>
       <div class="stop-row" data-stop="28" data-day="6" data-name="Florien" data-lat="31.445792500000003" data-lon="-93.46181433541567" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">28</div>
@@ -809,40 +810,57 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="29" data-day="6" data-name="Alexandria" data-lat="31.29555" data-lon="-92.46988725907585" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+    </div>
+  </div>
+
+  <div class="day-panel" id="panel-7">
+    <div class="day-header">
+      <div>
+        <div class="day-title"><span>07</span> Day 7</div>
+        <div class="day-meta" id="day-meta-7"></div>
+      </div>
+      <a class="gmaps-btn" id="gmaps-7" href="#" target="_blank">Open in Maps ↗</a>
+    </div>
+    <div class="day-progress">
+      <div class="day-prog-bar"><div class="day-prog-fill" id="day-prog-7"></div></div>
+      <div class="day-prog-label" id="day-prog-label-7">0 / 4</div>
+    </div>
+    <div class="stop-list" id="stop-list-7">
+
+      <div class="stop-row" data-stop="29" data-day="7" data-name="Alexandria" data-lat="31.29555" data-lon="-92.46988725907585" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">29</div>
-        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-day" title="Click to change day">D7</div>
         <div class="stop-name">Alexandria</div>
         <div class="stop-badge badge-medium">Medium</div>
         <div class="stop-time">1h 00m</div>
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="30" data-day="6" data-name="Pine Prairie" data-lat="30.778965499999998" data-lon="-92.4256051119068" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+      <div class="stop-row" data-stop="30" data-day="7" data-name="Pine Prairie" data-lat="30.778965499999998" data-lon="-92.4256051119068" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">30</div>
-        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-day" title="Click to change day">D7</div>
         <div class="stop-name">Pine Prairie</div>
         <div class="stop-badge badge-small">Small</div>
         <div class="stop-time">0h 30m</div>
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="31" data-day="6" data-name="Moss Bluff" data-lat="30.2964525" data-lon="-93.21916657894737" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
+      <div class="stop-row" data-stop="31" data-day="7" data-name="Moss Bluff" data-lat="30.2964525" data-lon="-93.21916657894737" data-min="60" data-size="Medium" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">31</div>
-        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-day" title="Click to change day">D7</div>
         <div class="stop-name">Moss Bluff</div>
         <div class="stop-badge badge-medium">Medium</div>
         <div class="stop-time">1h 00m</div>
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="32" data-day="6" data-name="Westlake" data-lat="30.259533" data-lon="-93.26310673053209" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+      <div class="stop-row" data-stop="32" data-day="7" data-name="Westlake" data-lat="30.259533" data-lon="-93.26310673053209" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">32</div>
-        <div class="stop-day" title="Click to change day">D6</div>
+        <div class="stop-day" title="Click to change day">D7</div>
         <div class="stop-name">Westlake</div>
         <div class="stop-badge badge-small">Small</div>
         <div class="stop-time">0h 30m</div>
@@ -857,8 +875,8 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
 const STORAGE_KEY  = 'louisiana_2h26_progress';   // stable — survives regeneration
 const EOD_KEY      = 'louisiana_2h26_eod';        // driven evening of day N (keyed by day N)
 const HOTELS_KEY   = 'louisiana_2h26_hotels';     // overnight stops keyed by day N
-const ORDER_KEY    = 'louisiana_2h26_20260811T145314_order';     // per-generation — resets on regenerate
-let TOTAL_DAYS     = 6;
+const ORDER_KEY    = 'louisiana_2h26_20260812T124246_order';     // per-generation — resets on regenerate
+let TOTAL_DAYS     = 7;
 const STATE        = 'Louisiana';
 const TOWN_COORDS  = {"Barataria": {"lat": 29.703848999999998, "lon": -90.11133785151891}, "Empire": {"lat": 29.409227, "lon": -89.60982374271245}, "Houma": {"lat": 29.5784115, "lon": -90.74243486664102}, "Bayou Cane": {"lat": 29.626019499999998, "lon": -90.74995155679117}, "Chackbay": {"lat": 29.8797905, "lon": -90.80987819542862}, "Welcome": {"lat": 30.0469735, "lon": -90.8835060042588}, "Morgan City": {"lat": 29.7120115, "lon": -91.20327007417755}, "Jeanerette": {"lat": 29.914189999999998, "lon": -91.67018636358449}, "New Iberia": {"lat": 30.0072575, "lon": -91.81381709323922}, "Youngsville": {"lat": 30.0989005, "lon": -91.99871479505558}, "Lafayette": {"lat": 30.2091655, "lon": -92.04274869914582}, "Leonville": {"lat": 30.467171999999998, "lon": -91.98062363117876}, "New Roads": {"lat": 30.693706, "lon": -91.4520597424353}, "Hammond": {"lat": 30.504649, "lon": -90.4760581007447}, "Mandeville": {"lat": 30.376105000000003, "lon": -90.12203219673586}, "Madisonville": {"lat": 30.401505, "lon": -90.16335064405307}, "Greensburg": {"lat": 30.830826000000002, "lon": -90.66850478823812}, "Simmesport": {"lat": 30.979357, "lon": -91.81185541544744}, "Hessmer": {"lat": 31.054337500000003, "lon": -92.12198096635169}, "Ferriday": {"lat": 31.635611, "lon": -91.55111654580257}, "Monroe": {"lat": 32.5345235, "lon": -92.09355171379366}, "Ruston": {"lat": 32.528737, "lon": -92.6313964521661}, "Grambling": {"lat": 32.526086, "lon": -92.71459491747756}, "Homer": {"lat": 32.7982265, "lon": -93.0561420395812}, "Lakeview": {"lat": 32.525914, "lon": -93.83116730320407}, "Shreveport": {"lat": 32.467681, "lon": -93.79365495067862}, "Pleasant Hill": {"lat": 31.8166395, "lon": -93.51686158692269}, "Florien": {"lat": 31.445792500000003, "lon": -93.46181433541567}, "Alexandria": {"lat": 31.29555, "lon": -92.46988725907585}, "Pine Prairie": {"lat": 30.778965499999998, "lon": -92.4256051119068}, "Moss Bluff": {"lat": 30.2964525, "lon": -93.21916657894737}, "Westlake": {"lat": 30.259533, "lon": -93.26310673053209}};
 const AVG_KMH      = 60;
