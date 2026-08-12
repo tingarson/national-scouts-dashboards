@@ -389,14 +389,14 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     <div class="brand">
       <div class="brand-tag">National Scouts · Route Mission</div>
       <h1>LOUISIANA</h1>
-      <div class="brand-sub">Barataria → Westlake</div>
+      <div class="brand-sub">Empire → Westlake</div>
     </div>
     <div class="header-stats">
       <div class="hstat">Stops <strong>32</strong></div>
       <div class="hstat">Days <strong>7</strong></div>
-      <div class="hstat">Distance <strong>970 mi</strong></div>
+      <div class="hstat">Distance <strong>940 mi</strong></div>
       <div class="hstat">Scout time <strong>24 h</strong></div>
-      <div class="hstat">Drive time <strong>26 h</strong></div>
+      <div class="hstat">Drive time <strong>25 h</strong></div>
     </div>
   </header>
 
@@ -445,21 +445,21 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
     </div>
     <div class="stop-list" id="stop-list-1">
 
-      <div class="stop-row" data-stop="1" data-day="1" data-name="Barataria" data-lat="29.703848999999998" data-lon="-90.11133785151891" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+      <div class="stop-row" data-stop="1" data-day="1" data-name="Empire" data-lat="29.409227" data-lon="-89.60982374271245" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">01</div>
         <div class="stop-day" title="Click to change day">D1</div>
-        <div class="stop-name">Barataria</div>
+        <div class="stop-name">Empire</div>
         <div class="stop-badge badge-small">Small</div>
         <div class="stop-time">0h 30m</div>
         <div class="check-icon">✓</div>
         <div class="eod-moon" title="End of day here">🌙</div>
       </div>
-      <div class="stop-row" data-stop="2" data-day="1" data-name="Empire" data-lat="29.409227" data-lon="-89.60982374271245" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
+      <div class="stop-row" data-stop="2" data-day="1" data-name="Barataria" data-lat="29.703848999999998" data-lon="-90.11133785151891" data-min="30" data-size="Small" onclick="toggleStop(event,this)">
         <div class="drag-handle" title="Drag to reorder">⠿</div>
         <div class="stop-num">02</div>
         <div class="stop-day" title="Click to change day">D1</div>
-        <div class="stop-name">Empire</div>
+        <div class="stop-name">Barataria</div>
         <div class="stop-badge badge-small">Small</div>
         <div class="stop-time">0h 30m</div>
         <div class="check-icon">✓</div>
@@ -875,10 +875,10 @@ header { display:grid; grid-template-columns:1fr auto; align-items:start; gap:24
 const STORAGE_KEY  = 'louisiana_2h26_progress';   // stable — survives regeneration
 const EOD_KEY      = 'louisiana_2h26_eod';        // driven evening of day N (keyed by day N)
 const HOTELS_KEY   = 'louisiana_2h26_hotels';     // overnight stops keyed by day N
-const ORDER_KEY    = 'louisiana_2h26_20260812T124246_order';     // per-generation — resets on regenerate
+const ORDER_KEY    = 'louisiana_2h26_20260812T125155_order';     // per-generation — resets on regenerate
 let TOTAL_DAYS     = 7;
 const STATE        = 'Louisiana';
-const TOWN_COORDS  = {"Barataria": {"lat": 29.703848999999998, "lon": -90.11133785151891}, "Empire": {"lat": 29.409227, "lon": -89.60982374271245}, "Houma": {"lat": 29.5784115, "lon": -90.74243486664102}, "Bayou Cane": {"lat": 29.626019499999998, "lon": -90.74995155679117}, "Chackbay": {"lat": 29.8797905, "lon": -90.80987819542862}, "Welcome": {"lat": 30.0469735, "lon": -90.8835060042588}, "Morgan City": {"lat": 29.7120115, "lon": -91.20327007417755}, "Jeanerette": {"lat": 29.914189999999998, "lon": -91.67018636358449}, "New Iberia": {"lat": 30.0072575, "lon": -91.81381709323922}, "Youngsville": {"lat": 30.0989005, "lon": -91.99871479505558}, "Lafayette": {"lat": 30.2091655, "lon": -92.04274869914582}, "Leonville": {"lat": 30.467171999999998, "lon": -91.98062363117876}, "New Roads": {"lat": 30.693706, "lon": -91.4520597424353}, "Hammond": {"lat": 30.504649, "lon": -90.4760581007447}, "Mandeville": {"lat": 30.376105000000003, "lon": -90.12203219673586}, "Madisonville": {"lat": 30.401505, "lon": -90.16335064405307}, "Greensburg": {"lat": 30.830826000000002, "lon": -90.66850478823812}, "Simmesport": {"lat": 30.979357, "lon": -91.81185541544744}, "Hessmer": {"lat": 31.054337500000003, "lon": -92.12198096635169}, "Ferriday": {"lat": 31.635611, "lon": -91.55111654580257}, "Monroe": {"lat": 32.5345235, "lon": -92.09355171379366}, "Ruston": {"lat": 32.528737, "lon": -92.6313964521661}, "Grambling": {"lat": 32.526086, "lon": -92.71459491747756}, "Homer": {"lat": 32.7982265, "lon": -93.0561420395812}, "Lakeview": {"lat": 32.525914, "lon": -93.83116730320407}, "Shreveport": {"lat": 32.467681, "lon": -93.79365495067862}, "Pleasant Hill": {"lat": 31.8166395, "lon": -93.51686158692269}, "Florien": {"lat": 31.445792500000003, "lon": -93.46181433541567}, "Alexandria": {"lat": 31.29555, "lon": -92.46988725907585}, "Pine Prairie": {"lat": 30.778965499999998, "lon": -92.4256051119068}, "Moss Bluff": {"lat": 30.2964525, "lon": -93.21916657894737}, "Westlake": {"lat": 30.259533, "lon": -93.26310673053209}};
+const TOWN_COORDS  = {"Empire": {"lat": 29.409227, "lon": -89.60982374271245}, "Barataria": {"lat": 29.703848999999998, "lon": -90.11133785151891}, "Houma": {"lat": 29.5784115, "lon": -90.74243486664102}, "Bayou Cane": {"lat": 29.626019499999998, "lon": -90.74995155679117}, "Chackbay": {"lat": 29.8797905, "lon": -90.80987819542862}, "Welcome": {"lat": 30.0469735, "lon": -90.8835060042588}, "Morgan City": {"lat": 29.7120115, "lon": -91.20327007417755}, "Jeanerette": {"lat": 29.914189999999998, "lon": -91.67018636358449}, "New Iberia": {"lat": 30.0072575, "lon": -91.81381709323922}, "Youngsville": {"lat": 30.0989005, "lon": -91.99871479505558}, "Lafayette": {"lat": 30.2091655, "lon": -92.04274869914582}, "Leonville": {"lat": 30.467171999999998, "lon": -91.98062363117876}, "New Roads": {"lat": 30.693706, "lon": -91.4520597424353}, "Hammond": {"lat": 30.504649, "lon": -90.4760581007447}, "Mandeville": {"lat": 30.376105000000003, "lon": -90.12203219673586}, "Madisonville": {"lat": 30.401505, "lon": -90.16335064405307}, "Greensburg": {"lat": 30.830826000000002, "lon": -90.66850478823812}, "Simmesport": {"lat": 30.979357, "lon": -91.81185541544744}, "Hessmer": {"lat": 31.054337500000003, "lon": -92.12198096635169}, "Ferriday": {"lat": 31.635611, "lon": -91.55111654580257}, "Monroe": {"lat": 32.5345235, "lon": -92.09355171379366}, "Ruston": {"lat": 32.528737, "lon": -92.6313964521661}, "Grambling": {"lat": 32.526086, "lon": -92.71459491747756}, "Homer": {"lat": 32.7982265, "lon": -93.0561420395812}, "Lakeview": {"lat": 32.525914, "lon": -93.83116730320407}, "Shreveport": {"lat": 32.467681, "lon": -93.79365495067862}, "Pleasant Hill": {"lat": 31.8166395, "lon": -93.51686158692269}, "Florien": {"lat": 31.445792500000003, "lon": -93.46181433541567}, "Alexandria": {"lat": 31.29555, "lon": -92.46988725907585}, "Pine Prairie": {"lat": 30.778965499999998, "lon": -92.4256051119068}, "Moss Bluff": {"lat": 30.2964525, "lon": -93.21916657894737}, "Westlake": {"lat": 30.259533, "lon": -93.26310673053209}};
 const AVG_KMH      = 60;
 const SCOUT_MINS   = {"Large":120,"Medium":60,"Small":30};
 
